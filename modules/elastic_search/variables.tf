@@ -25,5 +25,8 @@ variable "subnet_ids" {
   type        = list(string)
   default     = ["subnet-03212edf6d0f0c101", "subnet-00ba1197ad5eb3854", "subnet-0d5acc6337a4f307d"]  # Reemplaza con los IDs de tus subredes
 }
-
+variable "environment"{
+    type= string
+    default= "demo"
+}
 

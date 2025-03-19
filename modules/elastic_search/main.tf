@@ -27,6 +27,7 @@ resource "aws_instance" "elasticsearch_nodes" {
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
 
+  iam_instance_profile = aws_iam_instance_profile.ec2_role_i0.name
   # Seguridad
   vpc_security_group_ids = [aws_security_group.elasticsearch.id,data.aws_security_group.default.id]
   root_block_device {
@@ -41,11 +42,7 @@ resource "aws_instance" "elasticsearch_nodes" {
     DNS_NAME="i${count.index}-rss-engine-demo"
   }
 
-  user_data = <<-EOF
-    sudo apt-get update -y
-    sudo apt-get install -y nfs-common unzip dos2unix
-    echo "i${count.index}" > /etc/rss-engine  # Guardar el ID de la instancia
-    echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix  # Guardar el DNS_NAME en otro archivo
-    curl 
-  EOF
+  user_data = templatefile("${path.module}/user_data.tpl", {
+    instance_id = "i${count.index}-${var.environment}"  # Pasar el ID de la instancia dinámicamente
+  })
 }

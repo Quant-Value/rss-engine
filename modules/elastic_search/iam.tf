@@ -1,5 +1,5 @@
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2-docker-role-i3"
+resource "aws_iam_role" "ec2_role_i0" {
+  name = "ec2-docker-role-i0"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -15,9 +15,9 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-resource "aws_iam_role_policy" "ec2_policy" {
-  name   = "ec2-docker-policy-i3"
-  role   = aws_iam_role.ec2_role.id
+resource "aws_iam_role_policy" "ec2_policy_i0" {
+  name   = "ec2-docker-policy-i0"
+  role   = aws_iam_role.ec2_role_i0.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -49,12 +49,23 @@ resource "aws_iam_role_policy" "ec2_policy" {
           "arn:aws:s3:::*",
           "arn:aws:s3:::*/*"
         ]
+      },
+      # Añadir permisos para Route 53
+      {
+        Action   = "route53:ChangeResourceRecordSets"
+        Effect   = "Allow"
+        Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+      },
+      {
+        Action   = "route53:ListResourceRecordSets"
+        Effect   = "Allow"
+        Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
       }
     ]
   })
 }
 
-resource "aws_iam_instance_profile" "ec2_role" {
-  name = "ec2-docker-instance-profile-i3"
-  role = aws_iam_role.ec2_role.name
+resource "aws_iam_instance_profile" "ec2_role_i0" {
+  name = "ec2-docker-instance-profile-i0"
+  role = aws_iam_role.ec2_role_i0.name
 }
