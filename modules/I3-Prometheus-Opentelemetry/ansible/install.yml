@@ -1,0 +1,83 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Actualizar todos los paquetes a la última versión
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+        autoclean: yes
+        
+    - name: Instalar paquetes del sistema necesarios
+      apt:
+        name:
+          - unzip
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: latest
+        update_cache: true
+        
+    - name: Verificar si AWS CLI está instalado
+      command: aws --version
+      register: aws_cli_installed
+      ignore_errors: true  # Ignora errores si AWS CLI no está instalado
+
+    - name: Instalar AWS CLI
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+      when: aws_cli_installed.rc != 0  # Solo se ejecuta si AWS CLI no está instalado
+  
+    - name: Crear directorio para llaves de Docker
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Descargar la clave GPG de Docker
+      command:
+        cmd: curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+
+
+    - name: Agregar el repositorio de Docker al archivo docker.list
+      shell: |
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+              $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+              tee /etc/apt/sources.list.d/docker.list > /dev/null
+      args:
+        executable: /bin/bash
+
+
+    - name: Actualizar índice de apt
+      apt:
+        update_cache: yes
+
+    - name: Instalar Docker y sus componentes
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+
+    - name: Add remote "ubuntu" user to "docker" group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+      
+    - name: Reiniciar el servicio Docker
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: Iniciar sesión en ECR
+      shell: "aws ecr get-login-password --region eu-west-3 | sudo docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
