@@ -1,0 +1,15 @@
+- name: Configure EC2 Node
+  hosts: all
+  become: yes
+  tasks:
+    # Tarea 8: Detiene los contenedores en ejecución usando Docker Compose
+  - name: Stop running containers with Docker Compose
+    command: docker compose down
+    args:
+      chdir: /home/ubuntu
+
+  # Tarea 9: Inicia los contenedores en segundo plano usando Docker Compose
+  - name: Start containers with Docker Compose
+    command: docker compose up -d
+    args:
+      chdir: /home/ubuntu

@@ -1,0 +1,45 @@
+- name: Configure EC2 Node
+  hosts: all
+  become: yes
+  tasks:
+
+  # Tarea 1: Copia la configuración de OpenTelemetry al servidor
+  - name: Copiar configuración de OpenTelemetry
+    ansible.builtin.copy:
+      src: ./config/otel-collector-config.yml
+      dest: /mnt/efs/otel/conf/otel-collector-config.yml
+      mode: "0644"
+
+  # Tarea 2: Copia la configuración principal de Prometheus al servidor
+  - name: Copiar configuración de Prometheus
+    ansible.builtin.copy:
+      src: ./config/prometheus.yml
+      dest: /mnt/efs/prometheus/config/prometheus.yml
+      mode: "0644"
+
+  # Tarea 3: Copia el archivo de configuración web de Prometheus al servidor
+  - name: Copiar configuración web de Prometheus
+    ansible.builtin.copy:
+      src: ./config/web.yml
+      dest: /mnt/efs/prometheus/config/web.yml
+      mode: "0644"
+
+  # Tarea 4: Genera el archivo docker-compose.yml a partir de una plantilla
+  - name: Generate docker-compose.yml from template
+    template:
+      src: ./docker-compose.yml.j2
+      dest: /home/ubuntu/docker-compose.yml
+      mode: '0644'
+
+  # Tarea 5: Añadir archivos de configuracion nagios a la imagen
+  - name: Deploy Nagios Configuration
+    copy:
+      src: ./nagios_config/
+      dest: /mnt/efs/nagios/nagios_config/
+      mode: '0644'
+
+  - name: Copy cert to host
+    ansible.builtin.copy:
+      src: ./certs/ca/   # Ruta de la plantilla
+      dest: /mnt/efs/otel/ca/    # Ruta de destino
+      mode: '0644'

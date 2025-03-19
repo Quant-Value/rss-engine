@@ -1,0 +1,26 @@
+extensions:
+  health_check:
+    endpoint: "otel-collector:13133"
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: otel-collector:4317
+      http:
+        endpoint: otel-collector:4318
+#        tls:
+#          cert_file: /otel/ca/ca.crt
+#          key_file: /otel/ca/ca.key
+exporters:
+  prometheus:
+    endpoint: "otel-collector:8889"  # Prometheus scrapea métricas desde aquí
+    enable_open_metrics: true
+
+service:
+  extensions: [health_check]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheus]
+
