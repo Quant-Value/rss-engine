@@ -41,7 +41,7 @@ resource "aws_instance" "public_ec2" {
     PRIVATE_IP=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
 
     # Set Route 53 DNS records for the EC2 instance (Public and Private IPs)
-    aws route53 change-resource-record-sets --hosted-zone-id ZONE_ID --change-batch '{
+    aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch '{
         "Changes": [
             {
                 "Action": "UPSERT",
