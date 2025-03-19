@@ -12,8 +12,7 @@ resource "aws_instance" "public_ec2" {
 
   tags = {
     Name = "I4_instance",
-    Grupo= "g2",
-    DNS_NAME="I4"
+    Grupo= "g2"
 
   }
 
@@ -25,6 +24,10 @@ resource "aws_instance" "public_ec2" {
   user_data = <<-EOF
     #!/bin/bash
 
+    # Update the system and install necessary dependencies
+    apt-get update -y
+    apt-get install -y unzip curl
+
     # Set hostname
     hostnamectl set-hostname i4.g2-prometheus-lab.campusdual.mkcampus.com
 
@@ -33,8 +36,10 @@ resource "aws_instance" "public_ec2" {
     echo "g2-prometheus-lab.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
 
     # Install AWS CLI
-    sudo apt update
-    sudo apt install -y awscli
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install
+    rm -rf awscliv2.zip aws
 
     # Get IP addresses
     PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
