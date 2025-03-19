@@ -1,5 +1,5 @@
 - name: Configure EC2 Node
-  hosts: all
+  hosts: localhost
   become: yes
   tasks:
 
@@ -31,15 +31,3 @@
       dest: /home/ubuntu/docker-compose.yml
       mode: '0644'
 
-  # Tarea 5: Añadir archivos de configuracion nagios a la imagen
-  - name: Deploy Nagios Configuration
-    copy:
-      src: ./nagios_config/
-      dest: /mnt/efs/nagios/nagios_config/
-      mode: '0644'
-
-  - name: Copy cert to host
-    ansible.builtin.copy:
-      src: ./certs/ca/   # Ruta de la plantilla
-      dest: /mnt/efs/otel/ca/    # Ruta de destino
-      mode: '0644'
