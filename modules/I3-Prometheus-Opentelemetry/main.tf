@@ -38,12 +38,13 @@ resource "aws_instance" "ec2_node" {
   }
 
   tags = {
-    Name = "Grupo2-prometheus-opentelemetry-instance-es-${count.index + 1}",
+    Name = "Grupo2-prometheus-opentelemetry-i3-es-${count.index + 1}",
     Grupo="g2",
     DNS_NAME="i3-rss-engine-demo"
   }
 
   user_data = templatefile("${path.module}/user_data.tpl", {
-    instance_id = "i3-${var.environment}"  # Pasar el ID de la instancia dinámicamente
+    instance_id = "i3-${var.environment}"
+    record_name = "i3-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
   })
 }
