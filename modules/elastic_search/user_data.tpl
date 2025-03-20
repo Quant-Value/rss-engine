@@ -33,7 +33,7 @@ private_ip=$(hostname -I | awk '{print $1}')
 
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
 zone_id="Z06113313M7JJFJ9M7HM8"  # ID de tu zona de Route 53
-record_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com.campusdual.mkcampus.com"
+record_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com"
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
                 --change-batch '{
@@ -51,25 +51,57 @@ aws route53 change-resource-record-sets \
                 }'
 
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
-# Crear un servicio systemd para actualizar el DNS en cada reinicio
-SERVICE_CONTENT=$(cat <<EOF
+
+sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
+#!/bin/bash
+set -e
+
+private_ip=$(hostname -I | awk '{print $1}')
+record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
+echo "IP y record_name: $private_ip $record_name"
+
+json=$(cat <<EOT
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "$record_name",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "$private_ip"
+          }
+        ]
+      }
+    }
+  ]
+}
+EOT
+)
+
+echo "JSON generado: $json"
+aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch "$json"
+EOF
+
+
+#Dar permisos al script para ejecutarse
+sudo chmod +x /usr/local/bin/update-dns.sh
+
+#Condiguración del servicio de systemd llamando al script
+sudo tee /etc/systemd/system/update-dns.service > /dev/null <<EOF
 [Unit]
 Description=Actualizar registro DNS en Route 53 con la IP privada
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c \
-"private_ip=\$(hostname -I | awk '{print \$1}'); \
-record_name=\$(cat /etc/rss-engine-name)\$(cat /etc/rss-engine-dns-suffix);echo \$private_ip \$record_name \
-aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch '{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"\$record_name\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"\$private_ip\"}]}}]}'"
-Restart=no
+ExecStart=/usr/local/bin/update-dns.sh
 
 [Install]
 WantedBy=multi-user.target
 EOF
-)
-echo "$SERVICE_CONTENT" | sudo tee /etc/systemd/system/update-dns.service > /dev/null
 
 # el servicio funciona pero no acabo de entender porque funciona si al echo no le he puesto el ;
 
@@ -97,12 +129,20 @@ ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
 curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible 
+curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/docker-compose.yml.j2
+curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/install2.yml 
 
-# 3. Descargar el playbook de Ansible
-curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
 
-docker build -t ansible-local .  
+docker build -t ansible-local -f Dockerfile.ansible . 
+
+openssl genpkey -algorithm RSA -out ca/ca.key -pkeyopt rsa_keygen_bits:2048
+
+openssl req -new -x509 -key ca.key -out ca/ca.crt -days 3650 -subj "/C=US/ST=California/L=Los Angeles/O=MyOrg/OU=MyUnit/CN=example.com/emailAddress=email@example.com"
+
+
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
-sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install.yml"
+docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install2.yml"
 

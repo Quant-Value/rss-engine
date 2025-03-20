@@ -20,7 +20,7 @@ data "aws_security_group" "default" {
 }
 
 resource "aws_instance" "elasticsearch_nodes" {
-  count           = 3  # Número de instancias EC2 que deseas lanzar
+  count           = var.cantidad  # Número de instancias EC2 que deseas lanzar
   ami             = var.ami_id
   instance_type   = "t3.large"
   subnet_id       = var.subnet_ids[(count.index % 3)]
@@ -44,5 +44,6 @@ resource "aws_instance" "elasticsearch_nodes" {
 
   user_data = templatefile("${path.module}/user_data.tpl", {
     instance_id = "i${count.index}-${var.environment}"  # Pasar el ID de la instancia dinámicamente
+    cantidad    = var.cantidad  # Pasar la variable cantidad al user_data.tpl
   })
 }
