@@ -37,7 +37,7 @@
 
     - name: Copy Dockerfile.prometheus file from repository
       ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/Dockerfile.prometheus"  
+        src: "/tmp/imatia-rss-engine/dockerfiles/Dockerfile.prometheus"  
         dest: "/home/ubuntu/Dockerfile"
         mode: "0644"
       
