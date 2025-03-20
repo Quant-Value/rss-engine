@@ -27,7 +27,7 @@ variable "vpc_id" {
 variable "subnet_ids" {
   type        = string
   description = "IDs de las subnets privadas"
-  default = "subnet-0ea0184c208a85591"
+  default = "subnet-03212edf6d0f0c101"
 }
 variable "instance_count" {
   description = "Cantidad de instancias a crear"

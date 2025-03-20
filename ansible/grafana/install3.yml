@@ -6,9 +6,9 @@
   - name: Stop running containers with Docker Compose
     command: docker compose down
     args:
-      chdir: /home/ubuntu
+      chdir: /home/ubuntu/grafana
 
   - name: Start containers with Docker Compose
     command: docker compose up -d
     args:
-      chdir: /home/ubuntu
+      chdir: /home/ubuntu/grafana

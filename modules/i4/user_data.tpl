@@ -32,26 +32,32 @@ sudo apt install -y ansible
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
-curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/install.yml
-curl -o /home/ubuntu/playbooks/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/install2.yml
-curl -o /home/ubuntu/playbooks/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/install3.yml
-curl -o /home/ubuntu/docker/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/docker-compose.yml
+curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install.yml
+curl -o /home/ubuntu/playbooks/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install2.yml
+curl -o /home/ubuntu/playbooks/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install3.yml
 
-# Run the Ansible playbook (use the correct path to the playbook file)
-cd /home/ubuntu/playbooks
-ansible-playbook -i 127.0.0.1, install.yml
-ansible-playbook -i 127.0.0.1, install2.yml
-ansible-playbook -i 127.0.0.1, install3.yml
+
+# Run the Docker container with Ansible and execute the playbooks
+sudo docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /home/ubuntu:/home/ubuntu \
+  --network host \
+  --ulimit nofile=65536:65536 \
+  --ulimit nproc=65535 \
+  --ulimit memlock=-1 \
+  --privileged \
+  -e ANSIBLE_HOST_KEY_CHECKING=False \
+  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
+  demisto/ansible-runner:1.0.0.110653 \
+  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml && \
+         ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install2.yml && \
+         ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install3.yml"
+
 
 #Añadir ubuntu a grupo docker y reiniciar servicio docker
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
-# Change directory to where docker-compose.yml is located
-cd /home/ubuntu/docker
-
-# Start Grafana using Docker Compose
-sudo docker-compose up -d
 
 instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
