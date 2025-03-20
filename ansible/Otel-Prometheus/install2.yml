@@ -35,3 +35,14 @@
         dest: "/home/ubuntu/docker-compose.yml"
         mode: "0644"
 
+      
+    - name: Stop running containers with Docker Compose
+      command: docker compose down
+      args:
+        chdir: /home/ubuntu
+
+ 
+    - name: Start containers with Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: /home/ubuntu
