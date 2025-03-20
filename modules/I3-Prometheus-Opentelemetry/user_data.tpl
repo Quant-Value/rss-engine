@@ -86,13 +86,18 @@ sudo chown -R 1000:1000 /mnt/efs/
 
 
 # Descargar el playbook de Ansible
-curl -O https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
+# Descargar los tres playbooks desde GitHub
+curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install2.yml
+curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install3.yml
 
-# Ejecutar el playbook de Ansible dentro de un contenedor Docker
+
+# Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
+# de forma que se ejecuten de forma secuencial (en cascada).
 sudo docker run --rm -v /home/ubuntu:/home/ubuntu \
   --network host \
   -e ANSIBLE_HOST_KEY_CHECKING=False \
   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
   --privileged --name ansible-playbook-container \
   --entrypoint "/bin/sh" \
-  ansible/ansible-runner:latest -c "ansible-playbook /home/ubuntu/install.yml"
+  demisto/ansible-runner -c "ansible-playbook /home/ubuntu/install.yml && ansible-playbook /home/ubuntu/install2.yml && ansible-playbook /home/ubuntu/install3.yml"

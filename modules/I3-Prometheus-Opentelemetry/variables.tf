@@ -89,14 +89,4 @@ variable "hosted_zone_id" {
   default     = "Z06113313M7JJFJ9M7HM8"
 }
 
-variable "aws_access_key_id" {
-  description = "AWS Access Key ID para configurar AWS CLI (usar solo en entornos de prueba)"
-  type        = string
-  sensitive   = true
-}
-
-variable "aws_secret_access_key" {
-  description = "AWS Secret Access Key para configurar AWS CLI (usar solo en entornos de prueba)"
-  type        = string
-  sensitive   = true
-}
+ 

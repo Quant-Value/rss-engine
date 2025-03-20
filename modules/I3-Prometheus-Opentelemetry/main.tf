@@ -1,15 +1,6 @@
 provider "aws" {
   region = var.aws_region  # o la región correspondiente
 }
-locals {
-  user_data = templatefile("${path.module}/script.sh.tpl", {
-    instance_index    = "i3"
-    hosted_zone_id    = "Z06113313M7JJFJ9M7HM8"
-    region            = "eu-west-3"
-  })
-}
-
-
 
 resource "aws_key_pair" "key" {
   key_name   = "i3-key-g2"
@@ -37,7 +28,7 @@ resource "aws_instance" "ec2_node" {
   disable_api_stop = false
   
   # Asignar un rol a la instancia para acceder a ECR
-  iam_instance_profile = aws_iam_instance_profile.ec2_role.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_role_i3.name
   # Seguridad
   vpc_security_group_ids = [aws_security_group.prometheus.id,data.aws_security_group.default.id]
   root_block_device {
@@ -49,10 +40,10 @@ resource "aws_instance" "ec2_node" {
   tags = {
     Name = "Grupo2-prometheus-opentelemetry-instance-es-${count.index + 1}",
     Grupo="g2",
-    DNS_NAME="i${count.index}-rss-engine-demo"
+    DNS_NAME="i3-rss-engine-demo"
   }
 
   user_data = templatefile("${path.module}/user_data.tpl", {
-    instance_id = "i${count.index}-${var.environment}"  # Pasar el ID de la instancia dinámicamente
+    instance_id = "i3-${var.environment}"  # Pasar el ID de la instancia dinámicamente
   })
 }
