@@ -1,4 +1,4 @@
-
+services:
   prometheus:
     command: ["sh", "-c", "sudo chown -R 1000:1000 /prometheus && mkdir -p /prometheus/data && exec prometheus --config.file=/prometheus/config/prometheus.yml --storage.tsdb.path=/prometheus/data --web.config.file=/prometheus/config/web.yml"]
     image: 248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:prometheus-permisos
@@ -6,7 +6,6 @@
       - "9090:9090"
     volumes:
       - "/mnt/efs/prometheus:/prometheus"  # Volumen en EFS para datos de Prometheus
-     
     depends_on:
       otel-collector:
         condition: service_started

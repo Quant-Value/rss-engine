@@ -94,10 +94,4 @@ curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualde
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
 # de forma que se ejecuten de forma secuencial (en cascada).
-sudo docker run --rm -v /home/ubuntu:/home/ubuntu \
-  --network host \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  --privileged --name ansible-playbook-container \
-  --entrypoint "/bin/sh" \
-  demisto/ansible-runner -c "ansible-playbook /home/ubuntu/install.yml && ansible-playbook /home/ubuntu/install2.yml && ansible-playbook /home/ubuntu/install3.yml"
+sudo docker run --rm   -v /home/ubuntu:/home/ubuntu   -v /mnt/efs:/mnt/efs   --network host   --ulimit nofile=65536:65536   --ulimit nproc=65535   --ulimit memlock=-1   --privileged   -e ANSIBLE_HOST_KEY_CHECKING=False   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"   demisto/ansible-runner:1.0.0.110653   sh -c "ansible-playbook /home/ubuntu/install.yml && ansible-playbook /home/ubuntu/install2.yml && ansible-playbook /home/ubuntu/install3.yml"
