@@ -21,3 +21,8 @@ variable "vpc_id" {
   description = "ID de la VPC"
   default = "vpc-01c097d1d9b73fc50"
 }
+
+# variable "environment_id" {
+#   type = string
+#   default = "-rss-engine-demo"
+# }
