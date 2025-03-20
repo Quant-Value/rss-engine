@@ -40,7 +40,7 @@ services:
         target: /certs
     user: "1000:1000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health","-u elastic:a"]
       interval: 30s
       retries: 5
     deploy:
