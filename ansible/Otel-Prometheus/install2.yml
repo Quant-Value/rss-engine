@@ -23,11 +23,11 @@
         dest: "/mnt/efs/prometheus/config/prometheus.yml"
         mode: "0644"
 
-    - name: Copy Prometheus web configuration file
-      ansible.builtin.copy:
-        src: "/home/ubuntu/basic_auth_users.yml"
-        dest: "/mnt/efs/prometheus/config/web.yml"
-        mode: "0644"
+   # - name: Copy Prometheus web configuration file
+   #   ansible.builtin.copy:
+   #     src: "/home/ubuntu/basic_auth_users.yml"
+   #     dest: "/mnt/efs/prometheus/config/web.yml"
+    #    mode: "0644"
 
     - name: Copy docker-compose.yml file from repository
       ansible.builtin.copy:
