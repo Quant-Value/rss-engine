@@ -25,7 +25,7 @@
 
     - name: Copy Prometheus web configuration file
       ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/config/web.yml"
+        src: "/home/ubuntu/basic_auth_users.yml"
         dest: "/mnt/efs/prometheus/config/web.yml"
         mode: "0644"
 
