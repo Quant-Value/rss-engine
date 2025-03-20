@@ -1,6 +1,6 @@
 services:
   prometheus:
-    command: ["sh", "-c", "sudo chown -R 1000:1000 /prometheus && mkdir -p /prometheus/data && exec prometheus --config.file=/prometheus/config/prometheus.yml --storage.tsdb.path=/prometheus/data --web.config.file=/prometheus/config/web.yml"]
+    command: ["sh", "-c", "sudo chown -R 1000:1000 /prometheus && mkdir -p /prometheus/data2 && exec prometheus --config.file=/prometheus/config/prometheus.yml --storage.tsdb.path=/prometheus/data2 --web.config.file=/prometheus/config/web.yml"]
     build: .
     ports:
       - "9090:9090"

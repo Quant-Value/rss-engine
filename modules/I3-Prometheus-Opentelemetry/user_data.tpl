@@ -128,19 +128,26 @@ sudo chown -R 1000:1000 /mnt/efs/
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
-# Generar clave ssh
-ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
-
-# Copiar la clave pública al host destino
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
 curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install2.yml
-curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/hash.py
+curl -o /home/ubuntu/Hash.py https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/Hash.py
 
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
 # de forma que se ejecuten de forma secuencial (en cascada).
-sudo docker run --rm   -v /home/ubuntu:/home/ubuntu   -v /mnt/efs:/mnt/efs   --network host   --ulimit nofile=65536:65536   --ulimit nproc=65535   --ulimit memlock=-1   --privileged   -e ANSIBLE_HOST_KEY_CHECKING=False   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"   demisto/ansible-runner:1.0.0.110653   sh -c "ansible-playbook /home/ubuntu/install.yml && ansible-playbook /home/ubuntu/install2.yml && ansible-playbook /home/ubuntu/install3.yml"
+sudo docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /home/ubuntu:/home/ubuntu \
+  -v /mnt/efs:/mnt/efs \
+  --network host \
+  --ulimit nofile=65536:65536 \
+  --ulimit nproc=65535 \
+  --ulimit memlock=-1 \
+  --privileged \
+  -e ANSIBLE_HOST_KEY_CHECKING=False \
+  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
+  demisto/ansible-runner:1.0.0.110653 \
+  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/install2.yml"
+

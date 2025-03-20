@@ -1,5 +1,6 @@
 - name: Configure Elasticsearch Nodes
   hosts: localhost
+  connection: local
   become: yes
   vars:
     environment: "dev"  # Puedes ajustar el entorno según sea necesario
@@ -13,21 +14,32 @@
       set_fact:
         NODE_NAME: "{{ lookup('env', 'PRIVATE_IP') | regex_replace('\\.', '-') }}-node-{{ inventory_hostname }}"
 
-    # Tarea 2: Crear la lista de seed_hosts con los nombres DNS de los nodos
-    - name: Generate seed_hosts list
+    # Tarea 2: Generar lista de seed_hosts
+    - name: Generate seed_hosts list with DNS names
       set_fact:
-        seed_hosts: "{{ ['i' + item|string + '-demo-rss-engine-demo.campusdual.mkcampus.com' for item in range(0, lookup('env', 'NUM_NODES') | int)] }}"
+        SEED_HOSTS: "{{ SEED_HOSTS | default([]) + ['i' + (item|string) + '-demo-rss-engine-demo.campusdual.mkcampus.com'] }}"
+      with_sequence: start=0 end={{ lookup('env', 'NUM_NODES') | int - 1 }}
+      loop_control:
+        loop_var: item
+    
+    # Tarea 3: Generar lista de seed_hosts excluyendo el nodo con el índice especificado
+    - name: Generate seed_hosts excluding the node with the index
+      set_fact:
+        SEED_HOSTS_EXCLUDED: "{{ SEED_HOSTS | selectattr('search', 'not match', 'i' + index|string + '-demo') | list }}"
+      
 
-    # Tarea 3: Verificar la variable seed_hosts generada
+    # Tarea 3: Verificar la lista generada de seed_hosts
     - name: Debug seed_hosts list
       debug:
-        msg: "Generated seed_hosts: {{ seed_hosts }}"
+        msg: 
+          - "Generated seed_hosts: {{ SEED_HOSTS }}"
+          - "Generated seed_hosts_excluded: {{ SEED_HOSTS_EXCLUDED }}"
 
-    # Tarea 4: Generar el archivo docker-compose.yml a partir de la plantilla
+    # Tarea 4: Generar el archivo docker-compose.yml desde la plantilla
     - name: Generate docker-compose.yml from template
       template:
-        src: ./docker-compose.yml.j2     # Ruta de la plantilla
-        dest: /home/ubuntu/docker-compose.yml    # Ruta de destino
+        src: /ansible/playbooks/docker-compose.yml.j2
+        dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
 
     # Tarea 5: Iniciar Elasticsearch en segundo plano utilizando Docker Compose
