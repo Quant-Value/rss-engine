@@ -128,21 +128,22 @@ ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
 # 2. Copiar la clave pública al host destino
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
-curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible 
-curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/docker-compose.yml.j2
-curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/install2.yml 
+curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible
+
+curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/Dockerfile
+curl -o /home/ubuntu/docker-compose.yml.j2 https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/docker-compose.yml.j2
+curl -o /home/ubuntu/install2.yml  https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/install2.yml 
 
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
 docker build -t ansible-local -f Dockerfile.ansible . 
-
+mkdir ca
 openssl genpkey -algorithm RSA -out ca/ca.key -pkeyopt rsa_keygen_bits:2048
 
-openssl req -new -x509 -key ca.key -out ca/ca.crt -days 3650 -subj "/C=US/ST=California/L=Los Angeles/O=MyOrg/OU=MyUnit/CN=example.com/emailAddress=email@example.com"
-
+openssl req -new -x509 -key ca/ca.key -out ca/ca.crt -days 3650 -subj "/C=US/ST=California/L=Los Angeles/O=MyOrg/OU=MyUnit/CN=example.com/emailAddress=email@example.com"
 
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
-docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install2.yml"
+docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e PRIVATE_IP=$private_ip--privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install2.yml"
 

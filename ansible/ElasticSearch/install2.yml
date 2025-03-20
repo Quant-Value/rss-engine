@@ -4,29 +4,33 @@
   vars:
     environment: "dev"  # Puedes ajustar el entorno según sea necesario
   tasks:
+    - name: Debug environment variables
+      debug:
+        msg: "NUM_NODES is {{ lookup('env', 'NUM_NODES') }} and PRIVATE_IP is {{ lookup('env', 'PRIVATE_IP') }}"
+
     # Tarea 1: Generar un nombre único para el nodo
     - name: Generate unique NODE_NAME
       set_fact:
-        NODE_NAME: "{{ ansible_default_ipv4.address | regex_replace('\\.', '-') }}-node-{{ inventory_hostname }}"
+        NODE_NAME: "{{ lookup('env', 'PRIVATE_IP') | regex_replace('\\.', '-') }}-node-{{ inventory_hostname }}"
 
-    # Tarea 1: Crear la lista de seed_hosts con los nombres DNS de los nodos
+    # Tarea 2: Crear la lista de seed_hosts con los nombres DNS de los nodos
     - name: Generate seed_hosts list
       set_fact:
-        seed_hosts: "{{ ['i' + item|string + '-demo-rss-engine-demo.campusdual.mkcampus.com' for item in range(0, NUM_NODES)] }}"
+        seed_hosts: "{{ ['i' + item|string + '-demo-rss-engine-demo.campusdual.mkcampus.com' for item in range(0, lookup('env', 'NUM_NODES') | int)] }}"
 
-    # Tarea 2: Verificar la variable seed_hosts generada
+    # Tarea 3: Verificar la variable seed_hosts generada
     - name: Debug seed_hosts list
       debug:
         msg: "Generated seed_hosts: {{ seed_hosts }}"
 
-    # Tarea 3: Genera el archivo docker-compose.yml a partir de la plantilla
+    # Tarea 4: Generar el archivo docker-compose.yml a partir de la plantilla
     - name: Generate docker-compose.yml from template
       template:
         src: ./docker-compose.yml.j2     # Ruta de la plantilla
         dest: /home/ubuntu/docker-compose.yml    # Ruta de destino
         mode: '0644'
 
-    # Tarea 5: Inicia Elasticsearch en segundo plano utilizando Docker Compose
+    # Tarea 5: Iniciar Elasticsearch en segundo plano utilizando Docker Compose
     - name: Start Elasticsearch with Docker Compose
       command: docker compose up -d
       args:

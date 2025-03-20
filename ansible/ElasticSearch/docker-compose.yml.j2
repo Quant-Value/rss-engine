@@ -9,7 +9,7 @@ services:
       - node.name={{ NODE_NAME }}
       - discovery.seed_hosts={{ SEED_HOSTS }}
       - cluster.initial_master_nodes={{ SEED_HOSTS }}
-      - ELASTIC_PASSWORD={{ES_PASS}}
+      - ELASTIC_PASSWORD=contraseñaprueba
       #- ELASTIC_USER=elastic
       - xpack.security.enabled=true # Deshabilitar seguridad
       - xpack.security.transport.ssl.enabled= true
