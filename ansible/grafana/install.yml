@@ -43,9 +43,9 @@
     apt:
       update_cache: yes
 
-  - name: Add remote "ubuntu" user to "docker" group (skip if already added)
+  - name: Add remote "ubuntu" user to "docker" group
     user:
-      name: ubuntu
+      name: demisto
       groups: docker
       append: yes
 
