@@ -128,12 +128,6 @@ sudo chown -R 1000:1000 /mnt/efs/
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
-# Generar clave ssh
-ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
-
-# Copiar la clave pública al host destino
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
