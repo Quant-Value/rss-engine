@@ -89,14 +89,20 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 sudo chown -R 1000:1000 /mnt/efs/
 
 
-# Descargar el playbook de Ansible
+# 1. Generar un par de claves SSH de forma no interactiva
+echo "Generando par de claves SSH..."
+ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
+
+# 2. Copiar la clave pública al host destino
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible 
+
+# 3. Descargar el playbook de Ansible
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
 
-# Ejecutar el playbook de Ansible dentro de un contenedor Docker
-sudo docker run --rm -v /home/ubuntu:/ansible/playbooks\
-  --network host \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  --privileged --name ansible-playbook-container \
-  --entrypoint "/bin/sh" \
-  alpine/ansible:2.18.1 -c "ansible-playbook /ansible/playbooks/install.yml"
+docker build -t ansible-local .  
+
+# 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
+sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install.yml"
+
