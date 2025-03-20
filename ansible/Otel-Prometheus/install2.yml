@@ -1,5 +1,6 @@
 - name: Configure EC2 Node with OpenTelemetry and Prometheus configs from GitHub
   hosts: localhost
+  connection: local
   become: yes
   tasks:
 
