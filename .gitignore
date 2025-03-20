@@ -16,3 +16,5 @@ my-ec2-key
 *.json
 *.xml
 *xq*
+.*.key
+.*.crt

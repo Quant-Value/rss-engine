@@ -49,7 +49,7 @@ resource "aws_iam_role_policy" "ec2_policy_i0" {
           "arn:aws:s3:::*/*"
         ]
       },
-      # Añadir permisos para Route 53
+      // Añadir permisos para Route 53
       {
         Action   = "route53:ChangeResourceRecordSets"
         Effect   = "Allow"

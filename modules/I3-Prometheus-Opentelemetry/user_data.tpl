@@ -121,21 +121,24 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 # Establecer los permisos correctos en el EFS
 sudo chown -R 1000:1000 /mnt/efs/
 
-#Permisos ECR
 
-aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com
 
-#Añadir ubuntu a grupo docker y reiniciar servicio docker
+# Añadir ubuntu a grupo docker y reiniciar servicio docker
 
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
+# Generar clave ssh
+ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
+
+# Copiar la clave pública al host destino
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
 curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install2.yml
-curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install3.yml
+curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/hash.py
 
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,

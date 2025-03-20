@@ -1,0 +1,52 @@
+services:
+  elasticsearch:
+    command: ["sh", "-c", "sudo chown -R 1000:1000 /usr/share/elasticsearch/data /usr/share/elasticsearch/snapshots /certs && ./bin/elasticsearch-certutil cert --ca-cert /certs/ca.crt --ca-key /certs/ca.key --ca-pass \"\" --pass \"\" --out /usr/share/elasticsearch/config/elastic-certificates.p12 && /usr/local/bin/docker-entrypoint.sh"]
+    build: .
+    container_name: elasticsearch
+    network_mode: host
+    environment:
+      - cluster.name=es-cluster
+      - node.name={{ NODE_NAME }}
+      - discovery.seed_hosts={{ SEED_HOSTS }}
+      - cluster.initial_master_nodes={{ SEED_HOSTS }}
+      - ELASTIC_PASSWORD=contraseñaprueba
+      #- ELASTIC_USER=elastic
+      - xpack.security.enabled=true # Deshabilitar seguridad
+      - xpack.security.transport.ssl.enabled= true
+      - xpack.security.transport.ssl.verification_mode= certificate
+      - xpack.security.transport.ssl.client_authentication= required
+      - xpack.security.transport.ssl.keystore.path= /usr/share/elasticsearch/config/elastic-certificates.p12
+      - xpack.security.transport.ssl.truststore.path= /usr/share/elasticsearch/config/elastic-certificates.p12
+      - ingest.geoip.downloader.enabled=false # Evita descarga automática de GeoIP
+      - "ES_JAVA_OPTS=-Xms3g -Xmx3g"  # Límite de memoria para Elasticsearch
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - http.cors.allow-headers="X-Requested-With, Content-Type, Content-Length, Authorization"
+      - http.cors.allow-methods="OPTIONS, HEAD, GET, POST, PUT"
+      - path.data=/usr/share/elasticsearch/data
+      - path.repo=/usr/share/elasticsearch/snapshots
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - type: bind
+        source: /data/node-{{ NODE_NAME }}
+        target: /usr/share/elasticsearch/data
+      - type: bind
+        source: /mnt/efs/elasticsearch_snapshots
+        target: /usr/share/elasticsearch/snapshots
+      - type: bind
+        source: /home/ubuntu/ca
+        target: /certs
+    user: "1000:1000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 7g           # Limita el contenedor a 15 GB de RAM
+        reservations:
+          memory: 7g           # Reserva 15 GB de RAM para Elasticsearch
+          cpus: '1'           # Reserva 0.5 núcleos de CPU (se mantiene por si necesitas reservas mínimas de CPU)

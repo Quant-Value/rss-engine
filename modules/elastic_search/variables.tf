@@ -29,4 +29,8 @@ variable "environment"{
     type= string
     default= "demo"
 }
+variable "cantidad"{
+  type=number
+  default=3
+}
 
