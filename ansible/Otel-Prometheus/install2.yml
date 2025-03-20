@@ -35,6 +35,11 @@
         dest: "/home/ubuntu/docker-compose.yml"
         mode: "0644"
 
+    - name: Copy Dockerfile.prometheus file from repository
+      ansible.builtin.copy:
+        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/Dockerfile.prometheus"  
+        dest: "/home/ubuntu/Dockerfile"
+        mode: "0644"
       
     - name: Stop running containers with Docker Compose
       command: docker compose down

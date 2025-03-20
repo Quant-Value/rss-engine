@@ -138,7 +138,7 @@ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
 curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install2.yml
-curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install3.yml
+curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/hash.py
 
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
