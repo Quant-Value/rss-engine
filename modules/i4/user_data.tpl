@@ -32,10 +32,10 @@ sudo apt install -y ansible
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
-echo '${file("./ansible/grafana/install.yml")}' > /home/ubuntu/playbooks/install.yml
-echo '${file("./ansible/grafana/install2.yml")}' > /home/ubuntu/playbooks/install2.yml
-echo '${file("./ansible/grafana/install3.yml")}' > /home/ubuntu/playbooks/install3.yml
-echo '${file("./ansible/grafana/docker-compose.yml")}' > /home/ubuntu/docker/docker-compose.yml
+curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/install.yml
+curl -o /home/ubuntu/playbooks/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/install2.yml
+curl -o /home/ubuntu/playbooks/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/install3.yml
+curl -o /home/ubuntu/docker/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/main/ansible/grafana/docker-compose.yml
 
 # Run the Ansible playbook (use the correct path to the playbook file)
 cd /home/ubuntu/playbooks
