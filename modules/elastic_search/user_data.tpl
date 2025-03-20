@@ -121,21 +121,21 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 sudo chown -R 1000:1000 /mnt/efs/
 
 ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+cat /home/ubuntu/.ssh/id_rsa.pub >> /home/ubuntu/.ssh/authorized_keys
 
 curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible
 
-curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/Dockerfile
+curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.elastic
 curl -o /home/ubuntu/docker-compose.yml.j2 https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/docker-compose.yml.j2
 curl -o /home/ubuntu/install2.yml  https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/install2.yml 
 
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
-sudo docker build -t ansible-local -f Dockerfile.ansible . 
+sudo docker build -t ansible-local -f /home/ubuntu/Dockerfile.ansible  /home/ubuntu
 
 sudo mkdir /home/ubuntu/ca
-sudo openssl genpkey -algorithm RSA -out ca/ca.key -pkeyopt rsa_keygen_bits:2048
+sudo openssl genpkey -algorithm RSA -out /home/ubuntu/ca/ca.key -pkeyopt rsa_keygen_bits:2048
 
 sudo openssl req -new -x509 -key /home/ubuntu/ca/ca.key -out /home/ubuntu/ca/ca.crt -days 3650 -subj "/C=US/ST=California/L=Los Angeles/O=MyOrg/OU=MyUnit/CN=example.com/emailAddress=email@example.com"
 
