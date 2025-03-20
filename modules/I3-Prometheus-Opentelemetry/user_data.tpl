@@ -53,30 +53,63 @@ aws route53 change-resource-record-sets \
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
-sudo tee /etc/systemd/system/update-dns.service > /dev/null <<EOSERV
+sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
+#!/bin/bash
+set -e
+
+private_ip=$(hostname -I | awk '{print $1}')
+record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
+echo "IP y record_name: $private_ip $record_name"
+
+json=$(cat <<EOT
+{
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "$record_name",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "$private_ip"
+          }
+        ]
+      }
+    }
+  ]
+}
+EOT
+)
+
+echo "JSON generado: $json"
+aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch "$json"
+EOF
+
+
+#Dar permisos al script para ejecutarse
+sudo chmod +x /usr/local/bin/update-dns.sh
+
+#Condiguración del servicio de systemd llamando al script
+sudo tee /etc/systemd/system/update-dns.service > /dev/null <<EOF
 [Unit]
-Description=Actualizar registro DNS en Route53 con la IP privada
+Description=Actualizar registro DNS en Route 53 con la IP privada
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'private_ip=\$(hostname -I | awk "{print \$1}"); record_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com"; aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch "{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"\$record_name\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"\$private_ip\"}]}}]}\"'
-Restart=no
+ExecStart=/usr/local/bin/update-dns.sh
 
 [Install]
 WantedBy=multi-user.target
-EOSERV
+EOF
 
 
-# Reemplazar el placeholder <RECORD_NAME> por el valor real usando sed
-sudo sed -i "s|<RECORD_NAME>|${record_name}|g" /etc/systemd/system/update-dns.service
 
-# Recargar systemd para que lea la nueva unidad, habilitar y arrancar el servicio
+              # Habilitar el servicio para que se ejecute al iniciar la instancia
 sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
-
-
 
 # Montar EFS
 sudo mkdir -p /mnt/efs
