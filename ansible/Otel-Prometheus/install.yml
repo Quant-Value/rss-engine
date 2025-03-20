@@ -75,7 +75,7 @@
         append: yes
       
     - name: Reiniciar el servicio Docker
-      systemd:
+      service:
         name: docker
         state: restarted
 
