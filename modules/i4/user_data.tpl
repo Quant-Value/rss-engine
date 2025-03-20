@@ -33,8 +33,6 @@ sudo apt install -y ansible
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
 curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install.yml
-curl -o /home/ubuntu/playbooks/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install2.yml
-curl -o /home/ubuntu/playbooks/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install3.yml
 
 
 # Run the Docker container with Ansible and execute the playbooks
@@ -49,9 +47,7 @@ sudo docker run --rm \
   -e ANSIBLE_HOST_KEY_CHECKING=False \
   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
   demisto/ansible-runner:1.0.0.110653 \
-  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml && \
-         ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install2.yml && \
-         ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install3.yml"
+  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml"
 
 
 #Añadir ubuntu a grupo docker y reiniciar servicio docker
