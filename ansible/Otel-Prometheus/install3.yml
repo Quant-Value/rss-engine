@@ -1,5 +1,6 @@
 - name: Configure EC2 Node
-  hosts: all
+  hosts: localhost
+  connection: local
   become: yes
   tasks:
     # Tarea 8: Detiene los contenedores en ejecución usando Docker Compose

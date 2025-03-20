@@ -2,7 +2,6 @@ provider "aws" {
   region = var.aws_region  # o la región correspondiente
 }
 
-
 resource "aws_key_pair" "key" {
   key_name   = "i3-key-g2"
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
@@ -29,7 +28,7 @@ resource "aws_instance" "ec2_node" {
   disable_api_stop = false
   
   # Asignar un rol a la instancia para acceder a ECR
-  iam_instance_profile = aws_iam_instance_profile.ec2_role.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_role_i3.name
   # Seguridad
   vpc_security_group_ids = [aws_security_group.prometheus.id,data.aws_security_group.default.id]
   root_block_device {
@@ -38,75 +37,14 @@ resource "aws_instance" "ec2_node" {
     delete_on_termination = true  # El volumen raíz se elimina cuando la instancia se termina
   }
 
- user_data = <<-EOF
-    #!/bin/bash
-    set -ex
-
-    # Set hostname
-    hostnamectl set-hostname i3-instance-demo.campusdual.mkcampus.com
-
-    # Actualizar el sistema e instalar dependencias básicas
-    apt-get update -y
-    apt-get install -y nfs-common curl unzip
-
-    # Instalar AWS CLI v2 (si es necesario)
-    if ! command -v aws >/dev/null 2>&1; then
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      unzip awscliv2.zip
-      sudo ./aws/install
-    fi
-
-    # Escribir en el archivo /etc/rss-engine el ID de la instancia (i0, i1, etc)
-    echo "i3" > /etc/rss-engine
-
-    # Escribir en el archivo /etc/rss-engine-dns-suffix el ID junto con el sufijo
-    echo "i3-instance-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
-
-    # Configurar el hostname de la instancia
-    hostnamectl set-hostname iX-rss-engine-demo.campusdual.mkcampus.com
-
-    # Obtener la IP pública y la IP privada de la instancia
-    PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-    PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-
-    # Con AWS CLI, actualizar Route53 con los registros DNS para la instancia (público y privado)
-    aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch '{
-      "Comment": "Actualización de registros DNS para la instancia i'${count.index}'",
-      "Changes": [
-        {
-          "Action": "UPSERT",
-          "ResourceRecordSet": {
-            "Name": "i3-rss-engine-demo.campusdual.mkcampus.com",
-            "Type": "A",
-            "TTL": 300,
-            "ResourceRecords": [{"Value": "'"$${PUBLIC_IP}"'"}]
-          }
-        },
-        {
-          "Action": "UPSERT",
-          "ResourceRecordSet": {
-            "Name": "private-i3-rss-engine-demo.campusdual.mkcampus.com",
-            "Type": "A",
-            "TTL": 300,
-            "ResourceRecords": [{"Value": "'"$${PRIVATE_IP}"'"}]
-          }
-        }
-      ]
-    }'
-
-    # Instalar Docker usando el script oficial
-    curl -fsSL https://get.docker.com/ | sh
-  EOF
-
-
   tags = {
-    Name = "i3-rss-engine-demo-${count.index}"
+    Name = "Grupo2-prometheus-opentelemetry-i3-es-${count.index + 1}",
+    Grupo="g2",
+    DNS_NAME="i3-rss-engine-demo"
   }
+
+  user_data = templatefile("${path.module}/user_data.tpl", {
+    instance_id = "i3-${var.environment}"
+    record_name = "i3-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
+  })
 }
-    
-  
-
-
-
-
-

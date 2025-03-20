@@ -1,0 +1,37 @@
+- name: Configure EC2 Node with OpenTelemetry and Prometheus configs from GitHub
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+
+    - name: Clone repository from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git"
+        dest: "/tmp/imatia-rss-engine"
+        version: "main"
+        force: yes
+
+    - name: Copy OpenTelemetry collector configuration file
+      ansible.builtin.copy:
+        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/config/otel-collector-config.yml"
+        dest: "/mnt/efs/otel/conf/otel-collector-config.yml"
+        mode: "0644"
+
+    - name: Copy Prometheus main configuration file
+      ansible.builtin.copy:
+        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/config/prometheus.yml"
+        dest: "/mnt/efs/prometheus/config/prometheus.yml"
+        mode: "0644"
+
+    - name: Copy Prometheus web configuration file
+      ansible.builtin.copy:
+        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/config/web.yml"
+        dest: "/mnt/efs/prometheus/config/web.yml"
+        mode: "0644"
+
+    - name: Copy docker-compose.yml file from repository
+      ansible.builtin.copy:
+        src: "/tmp/imatia-rss-engine/ansible/Otel-Prometheus/docker-compose.yml"  
+        dest: "/home/ubuntu/docker-compose.yml"
+        mode: "0644"
+

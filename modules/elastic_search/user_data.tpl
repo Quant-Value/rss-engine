@@ -52,22 +52,26 @@ aws route53 change-resource-record-sets \
 
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
-sudo bash -c 'cat <<EOF > /etc/systemd/system/update-dns.service
+SERVICE_CONTENT=$(cat <<EOF
 [Unit]
 Description=Actualizar registro DNS en Route 53 con la IP privada
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c "private_ip=\$(hostname -I | awk '{print \$1}'); \
-  aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 \
-  --change-batch '\''{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"'$record_name'\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"\$private_ip\"}]}}]}'\''"
+ExecStart=/bin/bash -c \
+"private_ip=\$(hostname -I | awk '{print \$1}'); \
+record_name=\$(cat /etc/rss-engine-name)\$(cat /etc/rss-engine-dns-suffix);echo \$private_ip \$record_name \
+aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch '{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"\$record_name\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"\$private_ip\"}]}}]}'"
 Restart=no
 
 [Install]
 WantedBy=multi-user.target
-EOF'
+EOF
+)
+echo "$SERVICE_CONTENT" | sudo tee /etc/systemd/system/update-dns.service > /dev/null
 
+# el servicio funciona pero no acabo de entender porque funciona si al echo no le he puesto el ;
 
               # Habilitar el servicio para que se ejecute al iniciar la instancia
 sudo systemctl daemon-reload
@@ -85,14 +89,20 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 sudo chown -R 1000:1000 /mnt/efs/
 
 
-# Descargar el playbook de Ansible
-curl -O https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
+# 1. Generar un par de claves SSH de forma no interactiva
+echo "Generando par de claves SSH..."
+ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
 
-# Ejecutar el playbook de Ansible dentro de un contenedor Docker
-sudo docker run --rm -v /home/ubuntu:/home/ubuntu \
-  --network host \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  --privileged --name ansible-playbook-container \
-  --entrypoint "/bin/sh" \
-  ansible/ansible-runner:latest -c "ansible-playbook /home/ubuntu/install.yml"
+# 2. Copiar la clave pública al host destino
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible 
+
+# 3. Descargar el playbook de Ansible
+curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
+
+docker build -t ansible-local .  
+
+# 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
+sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install.yml"
+

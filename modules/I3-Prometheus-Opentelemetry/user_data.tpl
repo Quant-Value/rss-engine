@@ -33,7 +33,7 @@ private_ip=$(hostname -I | awk '{print $1}')
 
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
 zone_id="Z06113313M7JJFJ9M7HM8"  # ID de tu zona de Route 53
-record_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com.campusdual.mkcampus.com"
+record_name="${record_name}"
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
                 --change-batch '{
@@ -52,27 +52,31 @@ aws route53 change-resource-record-sets \
 
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
-sudo bash -c 'cat <<EOF > /etc/systemd/system/update-dns.service
+# Crear un servicio systemd para actualizar el DNS en cada reinicio
+sudo tee /etc/systemd/system/update-dns.service > /dev/null <<EOSERV
 [Unit]
-Description=Actualizar registro DNS en Route 53 con la IP privada
+Description=Actualizar registro DNS en Route53 con la IP privada
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c "private_ip=\$(hostname -I | awk '{print \$1}'); \
-  aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 \
-  --change-batch '\''{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"'$record_name'\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"\$private_ip\"}]}}]}'\''"
+ExecStart=/bin/bash -c 'private_ip=\$(hostname -I | awk "{print \$1}"); record_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com"; aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch "{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"\$record_name\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"\$private_ip\"}]}}]}\"'
 Restart=no
 
 [Install]
 WantedBy=multi-user.target
-EOF'
+EOSERV
 
 
-              # Habilitar el servicio para que se ejecute al iniciar la instancia
+# Reemplazar el placeholder <RECORD_NAME> por el valor real usando sed
+sudo sed -i "s|<RECORD_NAME>|${record_name}|g" /etc/systemd/system/update-dns.service
+
+# Recargar systemd para que lea la nueva unidad, habilitar y arrancar el servicio
 sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
+
+
 
 # Montar EFS
 sudo mkdir -p /mnt/efs
@@ -84,15 +88,23 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 # Establecer los permisos correctos en el EFS
 sudo chown -R 1000:1000 /mnt/efs/
 
+#Permisos ECR
+
+aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com
+
+#Añadir ubuntu a grupo docker y reiniciar servicio docker
+
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+
 
 # Descargar el playbook de Ansible
-curl -O https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
+# Descargar los tres playbooks desde GitHub
+curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install2.yml
+curl -o /home/ubuntu/install3.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install3.yml
 
-# Ejecutar el playbook de Ansible dentro de un contenedor Docker
-sudo docker run --rm -v /home/ubuntu:/home/ubuntu \
-  --network host \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  --privileged --name ansible-playbook-container \
-  --entrypoint "/bin/sh" \
-  ansible/ansible-runner:latest -c "ansible-playbook /home/ubuntu/install.yml"
+
+# Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
+# de forma que se ejecuten de forma secuencial (en cascada).
+sudo docker run --rm   -v /home/ubuntu:/home/ubuntu   -v /mnt/efs:/mnt/efs   --network host   --ulimit nofile=65536:65536   --ulimit nproc=65535   --ulimit memlock=-1   --privileged   -e ANSIBLE_HOST_KEY_CHECKING=False   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no"   demisto/ansible-runner:1.0.0.110653   sh -c "ansible-playbook /home/ubuntu/install.yml && ansible-playbook /home/ubuntu/install2.yml && ansible-playbook /home/ubuntu/install3.yml"

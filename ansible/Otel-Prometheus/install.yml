@@ -1,5 +1,5 @@
----
-- hosts: all
+- hosts: localhost
+  connection: local
   become: true
 
   tasks:
@@ -30,7 +30,7 @@
       shell: |
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
         unzip awscliv2.zip
-        sudo ./aws/install
+        ./aws/install
       when: aws_cli_installed.rc != 0  # Solo se ejecuta si AWS CLI no está instalado
   
     - name: Crear directorio para llaves de Docker
@@ -41,13 +41,13 @@
 
     - name: Descargar la clave GPG de Docker
       command:
-        cmd: curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+        cmd: curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 
 
     - name: Agregar el repositorio de Docker al archivo docker.list
       shell: |
             echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
               $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
               tee /etc/apt/sources.list.d/docker.list > /dev/null
       args:
@@ -70,14 +70,14 @@
 
     - name: Add remote "ubuntu" user to "docker" group
       user:
-        name: ubuntu
+        name: demisto
         groups: docker
         append: yes
       
     - name: Reiniciar el servicio Docker
-      systemd:
+      service:
         name: docker
         state: restarted
 
     - name: Iniciar sesión en ECR
-      shell: "aws ecr get-login-password --region eu-west-3 | sudo docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
+      shell: "aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"

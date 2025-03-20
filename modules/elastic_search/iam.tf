@@ -1,5 +1,5 @@
-resource "aws_iam_role" "ec2_role_i3" {
-  name = "ec2-docker-role-i3"
+resource "aws_iam_role" "ec2_role_i0" {
+  name = "ec2-docker-role-i0"
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17"
@@ -15,9 +15,9 @@ resource "aws_iam_role" "ec2_role_i3" {
   })
 }
 
-resource "aws_iam_role_policy" "ec2_policy_i3" {
-  name   = "ec2-docker-policy-i3"
-  role   = aws_iam_role.ec2_role_i3.id
+resource "aws_iam_role_policy" "ec2_policy_i0" {
+  name   = "ec2-docker-policy-i0"
+  role   = aws_iam_role.ec2_role_i0.id
   policy = jsonencode({
     Version   = "2012-10-17"
     Statement = [
@@ -64,7 +64,7 @@ resource "aws_iam_role_policy" "ec2_policy_i3" {
   })
 }
 
-resource "aws_iam_instance_profile" "ec2_role_i3" {
-  name = "ec2-docker-instance-profile-i3"
-  role = aws_iam_role.ec2_role_i3.name
+resource "aws_iam_instance_profile" "ec2_role_i0" {
+  name = "ec2-docker-instance-profile-i0"
+  role = aws_iam_role.ec2_role_i0.name
 }

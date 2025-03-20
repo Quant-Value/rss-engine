@@ -76,3 +76,17 @@ variable "ami_id" {
   type        = string
   default = "ami-06e02ae7bdac6b938"
 }
+
+variable "instance_index" {
+  description = "Identificador de la instancia (por ejemplo, 'i3', 'i0', etc.)"
+  type        = string
+  default     = "i3"
+}
+
+variable "hosted_zone_id" {
+  description = "Hosted Zone ID de Route53 donde se actualizarán los registros DNS"
+  type        = string
+  default     = "Z06113313M7JJFJ9M7HM8"
+}
+
+ 

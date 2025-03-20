@@ -1,0 +1,24 @@
+services:
+  prometheus:
+    command: ["sh", "-c", "sudo chown -R 1000:1000 /prometheus && mkdir -p /prometheus/data && exec prometheus --config.file=/prometheus/config/prometheus.yml --storage.tsdb.path=/prometheus/data --web.config.file=/prometheus/config/web.yml"]
+    image: 248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:prometheus-permisos
+    ports:
+      - "9090:9090"
+    volumes:
+      - "/mnt/efs/prometheus:/prometheus"  # Volumen en EFS para datos de Prometheus
+    depends_on:
+      otel-collector:
+        condition: service_started
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config", "/otel/conf/otel-collector-config.yml"]
+    ports:
+      - "4318:4318"
+      - "8889:8889"
+      - "13133:13133"
+    volumes:
+      - "/mnt/efs/otel:/otel"
+    restart: unless-stopped
+
