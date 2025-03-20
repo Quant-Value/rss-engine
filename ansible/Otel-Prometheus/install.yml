@@ -41,13 +41,13 @@
 
     - name: Descargar la clave GPG de Docker
       command:
-        cmd: curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+        cmd: curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 
 
     - name: Agregar el repositorio de Docker al archivo docker.list
       shell: |
             echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
               $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
               tee /etc/apt/sources.list.d/docker.list > /dev/null
       args:
@@ -70,7 +70,7 @@
 
     - name: Add remote "ubuntu" user to "docker" group
       user:
-        name: ubuntu
+        name: demisto
         groups: docker
         append: yes
       
