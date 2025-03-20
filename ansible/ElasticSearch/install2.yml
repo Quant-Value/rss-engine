@@ -1,18 +1,22 @@
 - name: Configure Elasticsearch Nodes
-  hosts: localhost
-  connection: local
+  hosts: all
   become: yes
   vars:
     environment: "dev"  # Puedes ajustar el entorno según sea necesario
   tasks:
     - name: Debug environment variables
       debug:
-        msg: "NUM_NODES is {{ lookup('env', 'NUM_NODES') }} and PRIVATE_IP is {{ lookup('env', 'PRIVATE_IP') }}"
+        msg: "NUM_NODES is {{ lookup('env', 'NUM_NODES') }} and PRIVATE_IP is {{ lookup('env', 'PRIVATE_IP') }} and the index is {{ lookup('env', 'INDEX') }}"
 
     # Tarea 1: Generar un nombre único para el nodo
     - name: Generate unique NODE_NAME
       set_fact:
         NODE_NAME: "{{ lookup('env', 'PRIVATE_IP') | regex_replace('\\.', '-') }}-node-{{ inventory_hostname }}"
+
+    # Cargar la variable INDEX desde el entorno y guardarla en una nueva variable
+    - name: Set the INDEX variable
+      set_fact:
+        INDEX_VAR: "{{ lookup('env', 'INDEX') }}"
 
     # Tarea 2: Generar lista de seed_hosts
     - name: Generate seed_hosts list with DNS names
@@ -22,11 +26,14 @@
       loop_control:
         loop_var: item
     
-    # Tarea 3: Generar lista de seed_hosts excluyendo el nodo con el índice especificado
+    - name: Generate excluded host
+      set_fact:
+        EXCLUDE_HOST: "{{ ['i', INDEX_VAR, '-demo-rss-engine-demo.campusdual.mkcampus.com'] | join('') }}"
+    
     - name: Generate seed_hosts excluding the node with the index
       set_fact:
-        SEED_HOSTS_EXCLUDED: "{{ SEED_HOSTS | selectattr('search', 'not match', 'i' + index|string + '-demo') | list }}"
-      
+        SEED_HOSTS_EXCLUDED: "{{ SEED_HOSTS | reject('equalto', EXCLUDE_HOST) | list }}"
+
 
     # Tarea 3: Verificar la lista generada de seed_hosts
     - name: Debug seed_hosts list
