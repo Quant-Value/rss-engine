@@ -1,5 +1,6 @@
 - name: Configure Elasticsearch Nodes
-  hosts: all
+  hosts: localhost
+  connection: local
   become: yes
   vars:
     environment: "dev"  # Puedes ajustar el entorno según sea necesario

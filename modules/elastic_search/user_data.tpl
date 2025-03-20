@@ -121,13 +121,6 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 sudo chown -R 1000:1000 /mnt/efs/
 
 
-# 1. Generar un par de claves SSH de forma no interactiva
-echo "Generando par de claves SSH..."
-sudo ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
-
-# 2. Copiar la clave pública al host destino
-sudo cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-
 curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible
 
 curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/ElasticSearch/Dockerfile
@@ -154,6 +147,6 @@ echo "$private_ip ansible_user=ubuntu" >> $hosts_file
 
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
-sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh -v /var/run/docker.sock:/var/run/docker.sock --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e PRIVATE_IP=$private_ip -e index=${index} --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install2.yml -i /ansible/playbooks/hosts.ini"
+sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /var/run/docker.sock:/var/run/docker.sock --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e PRIVATE_IP=$private_ip -e index=${index} --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook /ansible/playbooks/install2.yml -i 'localhost,' -c local "
 
 
