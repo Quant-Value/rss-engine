@@ -10,6 +10,12 @@
       state: directory
       mode: '0755'
 
+  - name: Ensure the directory exists for Grafana repository
+    file:
+      path: /home/ubuntu/grafana
+      state: directory
+      mode: '0755'
+
   - name: Copy Repository (docker-compose.yml)
     ansible.builtin.git:
       src: https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git
@@ -17,13 +23,13 @@
       version: "main"
       force: yes
 
-  - name: Copy docker-compose.yml to the correct location
-    ansible.builtin.copy:
-      src: /home/ubuntu/grafana/ansible/grafana/docker-compose.yml
-      dest: /home/ubuntu/grafana/config/docker-compose.yml
-
   - name: Ensure required directories exist
     ansible.builtin.file:
       path: "/home/ubuntu/grafana/config"
       state: directory
       mode: '0755'
+
+  - name: Copy docker-compose.yml to the correct location
+    ansible.builtin.copy:
+      src: /home/ubuntu/grafana/ansible/grafana/docker-compose.yml
+      dest: /home/ubuntu/grafana/config/docker-compose.yml
