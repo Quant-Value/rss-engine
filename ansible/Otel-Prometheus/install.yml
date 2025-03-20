@@ -80,4 +80,4 @@
         state: restarted
 
     - name: Iniciar sesión en ECR
-      shell: "aws ecr get-login-password --region eu-west-3 | sudo docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
+      shell: "aws ecr get-login-password --region eu-west-3 | docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
