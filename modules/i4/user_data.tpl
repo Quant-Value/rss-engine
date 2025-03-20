@@ -3,7 +3,7 @@
 set -x
 # Update the system and install necessary dependencies
 apt-get update -y
-apt-get install -y unzip curl nfs-common
+apt-get install -y unzip curl nfs-common git sudo docker.io python3-pip
 
 # Set hostname
 hostnamectl set-hostname i4-rss-engine-demo.campusdual.mkcampus.com
@@ -17,6 +17,41 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 unzip awscliv2.zip
 sudo ./aws/install
 rm -rf awscliv2.zip aws
+
+# Install Docker
+curl -fsSL https://get.docker.com/ | sh
+sudo usermod -aG docker $USER
+sudo systemctl enable docker
+sudo systemctl start docker
+
+# Install Docker Compose
+sudo apt-get install -y docker-compose
+
+# Install Ansible
+sudo apt install -y ansible
+
+# Ensure the playbook and docker-compose.yml file are available before running playbooks
+mkdir -p /home/ubuntu/playbooks
+echo '${file("./ansible/grafana/install.yml")}' > /home/ubuntu/playbooks/install.yml
+echo '${file("./ansible/grafana/install2.yml")}' > /home/ubuntu/playbooks/install2.yml
+echo '${file("./ansible/grafana/install3.yml")}' > /home/ubuntu/playbooks/install3.yml
+echo '${file("./ansible/grafana/docker-compose.yml")}' > /home/ubuntu/docker/docker-compose.yml
+
+# Run the Ansible playbook (use the correct path to the playbook file)
+cd /home/ubuntu/playbooks
+ansible-playbook -i 127.0.0.1, install.yml
+ansible-playbook -i 127.0.0.1, install2.yml
+ansible-playbook -i 127.0.0.1, install3.yml
+
+#Añadir ubuntu a grupo docker y reiniciar servicio docker
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+
+# Change directory to where docker-compose.yml is located
+cd /home/ubuntu/docker
+
+# Start Grafana using Docker Compose
+sudo docker-compose up -d
 
 instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
@@ -55,22 +90,11 @@ aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 -
     ]
 }'
 
-# Install Docker
-curl -fsSL https://get.docker.com/ | sh
-sudo usermod -aG docker $USER
-sudo systemctl enable docker
-sudo systemctl start docker
 
-# Install Ansible
-sudo apt install -y ansible
 
 # Run the Ansible playbook
 cd /home/ubuntu/iX-rss-engine
 ansible-playbook -i 127.0.0.1, playbook.yml
-
-#Añadir ubuntu a grupo docker y reiniciar servicio docker
-sudo usermod -aG docker ubuntu
-sudo systemctl restart docker
 
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
 sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'

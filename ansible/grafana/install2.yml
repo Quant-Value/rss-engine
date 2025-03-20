@@ -1,0 +1,13 @@
+- name: Configure EC2 Node with Grafana
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+
+  - name: Copy Repository
+    ansible.builtin.git:
+      src: ./ansible/grafana/docker-compose.yml
+      # dest: "/mnt/efs/grafana/config/docker-compose.yml"
+      dest: "/home/ubuntu/grafana/config/docker-compose.yml"
+      version: "main"
+      force: yes
