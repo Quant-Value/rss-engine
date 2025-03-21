@@ -43,7 +43,18 @@
     apt:
       update_cache: yes
 
-  - name: Add remote "ubuntu" user to "docker" group
+  - name: Ensure docker group exists
+    group:
+      name: docker
+      state: present
+
+  - name: Ensure Docker service is running
+    service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: Add remote "demisto" user to "docker" group
     user:
       name: demisto
       groups: docker
