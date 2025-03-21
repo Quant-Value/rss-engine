@@ -83,7 +83,7 @@ EOT
 )
 
 echo "JSON generado: $json"
-aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch "$json"
+aws route53 change-resource-record-sets --hosted-zone-id $zone_id --change-batch "$json"
 EOF
 
 
