@@ -174,19 +174,18 @@ wait_for_dns_resolution() {
 
   log_message "Esperando a la resolución correcta de DNS para $dns_name en el puerto $port..."
 
-  # Resolver el DNS para obtener la IP
-  resolved_ip=$(dig +short "$dns_name")
-  
-  if [ -z "$resolved_ip" ]; then
-    log_message "No se pudo resolver el nombre DNS: $dns_name"
-    return 1
-  fi
-
-  log_message "La IP resuelta para $dns_name es: $resolved_ip"
-
   # Esperar a que el puerto esté accesible
   while ! nc -z -w 3 "$resolved_ip" "$port"; do
-    elapsed=$((elapsed + interval))
+      # Resolver el DNS para obtener la IP
+    resolved_ip=$(dig +short "$dns_name")
+    
+    if [ -z "$resolved_ip" ]; then
+      log_message "No se pudo resolver el nombre DNS: $dns_name"
+      return 1
+    fi
+
+    log_message "La IP resuelta para $dns_name es: $resolved_ip"
+      elapsed=$((elapsed + interval))
     if [ $elapsed -ge $timeout ]; then
       log_message "Timeout alcanzado después de $timeout segundos. No se pudo conectar al puerto $port en $resolved_ip."
       return 1
@@ -202,7 +201,7 @@ wait_for_dns_resolution() {
 
 # Uso de la función
 dns_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com"
-port=9300
+port=22
 wait_for_dns_resolution "$dns_name" "$port"
 
 
@@ -213,4 +212,5 @@ sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/ro
 --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} \
 --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml  "
 
+log_message "FIN"
 

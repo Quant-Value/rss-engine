@@ -7,6 +7,7 @@ resource "aws_key_pair" "key" {
   key_name   = "my-key-ES"
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
 }
+
 data "aws_security_group" "default" {
   filter {
     name   = "vpc-id"
