@@ -1,12 +1,14 @@
 variable "region" {
   description = "AWS region"
   type=string
+  default = "eu-west-3"
 
 }
 
 variable "ami_id" {
   description = "The AMI ID to use for the EC2 instance"
   type        = string
+  default     = "ami-06e02ae7bdac6b938" 
 }
 
 
