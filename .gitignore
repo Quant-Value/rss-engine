@@ -18,3 +18,5 @@ my-ec2-key
 *xq*
 .*.key
 .*.crt
+.aws/
+

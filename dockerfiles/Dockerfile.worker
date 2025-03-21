@@ -1,0 +1,51 @@
+# Fase de construcción
+FROM flexvega/simple-worker:1.0.0-alpine AS builder
+
+FROM golang:1.23-alpine AS builder2
+RUN apk add --no-cache \
+    git 
+
+
+# Clona el repositorio de xq
+RUN git clone https://github.com/sibprogrammer/xq.git /tmp/xq \
+    &&cd /tmp/xq &&go build -o /usr/local/bin/xq .
+
+
+FROM ubuntu:24.04
+
+# Actualiza los repositorios e instala curl, jq, bash, dependencias para AWS CLI y certificados
+RUN apt update && apt install -y \
+    curl \
+    jq \
+    bash \
+    python3 \
+    python3-pip \
+    groff \
+    less \
+    unzip \
+    ca-certificates \
+    time \
+    && update-ca-certificates
+
+
+# Instalar AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws
+
+WORKDIR /app
+
+COPY --from=builder2 /usr/local/bin/xq   /usr/local/bin/xq 
+# Copia la aplicación compilada desde el contenedor de construcción
+COPY --from=builder /app/app-bluengo-worker ./
+
+# Asegúrate de que el binario sea ejecutable
+RUN chmod +x /app/app-bluengo-worker
+
+# Exponer el puerto que usará la aplicación
+EXPOSE 8080
+
+# Establece el punto de entrada para ejecutar la aplicación Go
+ENTRYPOINT ["./app-bluengo-worker", "worker"]
+
