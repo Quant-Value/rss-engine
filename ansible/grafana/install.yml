@@ -66,11 +66,10 @@
       name: demisto
       groups: docker
       append: yes
-
-  - name: Reiniciar el servicio Docker (if not already restarted in user_data)
-    service:
-      name: docker
-      state: restarted
+  # - name: Reiniciar el servicio Docker (if not already restarted in user_data)
+  #   service:
+  #     name: docker
+  #     state: restarted
 
 - name: Configure EC2 Node with Grafana
   hosts: localhost
