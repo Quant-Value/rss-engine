@@ -1,3 +1,4 @@
+
 ---
 - name: Provisionar servidor para server
   hosts: localhost
@@ -13,36 +14,9 @@
 
     - name: Copy docker-compose.yml file from repository
       ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-server.yml"  
+        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-server.yml"
         dest: "/home/ubuntu/docker-compose.yml"
         mode: "0644"
-   
-    - name: Crear un archivo de servicio systemd para el contenedor Docker
-      copy:
-        content: |
-          [Unit]
-          Description=Docker Container for my ECR app
-          After=network.target
-
-          [Service]
-          # Ejecutar docker-compose pull para descargar las imágenes antes de levantar los contenedores
-          ExecStartPre=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml pull
-          # Iniciar los contenedores en segundo plano con docker-compose
-          ExecStart=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml up -d
-          # Detener los contenedores
-          ExecStop=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml down
-
-          [Install]
-          WantedBy=multi-user.target
-        dest: /etc/systemd/system/mydockerapp.service
-        mode: '0644'
-
-    - name: Recargar los servicios systemd
-      systemd:
-        name: "mydockerapp.service"
-        daemon_reload: yes
-        enabled: yes
-        state: started
     # Tarea 11: Detiene Elasticsearch usando Docker Compose
     - name: Stop workers with Docker Compose
       command: docker compose down
@@ -54,4 +28,3 @@
       command: docker compose up -d
       args:
         chdir: /home/ubuntu
-
