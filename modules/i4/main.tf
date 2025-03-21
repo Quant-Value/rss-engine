@@ -29,7 +29,7 @@ resource "aws_instance" "public_ec2" {
   user_data = templatefile("${path.module}/user_data.tpl", {
     inumber = "i4"
     suffix_name = "-rss-engine-demo"
-    zone = var.hosted_zone
+    zone = "Z06113313M7JJFJ9M7HM8"
   })
 
   depends_on = [aws_security_group.sg]

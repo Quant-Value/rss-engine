@@ -6,7 +6,7 @@ apt-get update -y
 apt-get install -y unzip curl nfs-common git sudo docker.io python3-pip
 
 # Set hostname
-hostnamectl set-hostname i4-rss-engine-demo.campusdual.mkcampus.com
+hostnamectl set-hostname "i4-rss-engine-demo.campusdual.mkcampus.com"
 
 # Set /etc/rss-engine and /etc/rss-engine-dns-suffix
 echo -n "${inumber}" > /etc/rss-engine-name
@@ -18,11 +18,19 @@ unzip awscliv2.zip
 sudo ./aws/install
 rm -rf awscliv2.zip aws
 
-# Install Docker
-curl -fsSL https://get.docker.com/ | sh
-sudo usermod -aG docker $USER
-sudo systemctl enable docker
+# Instalar Docker
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+# Iniciar Docker
 sudo systemctl start docker
+sudo systemctl enable docker
+
+# Verificar Docker
+sudo docker --version
 
 # Install Docker Compose
 sudo apt-get install -y docker-compose
@@ -33,21 +41,6 @@ sudo apt install -y ansible
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
 curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install.yml
-
-
-# Run the Docker container with Ansible and execute the playbooks
-sudo docker run --rm \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /home/ubuntu:/home/ubuntu \
-  --network host \
-  --ulimit nofile=65536:65536 \
-  --ulimit nproc=65535 \
-  --ulimit memlock=-1 \
-  --privileged \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  demisto/ansible-runner:1.0.0.110653 \
-  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml"
 
 
 #Añadir ubuntu a grupo docker y reiniciar servicio docker
@@ -78,9 +71,6 @@ aws route53 change-resource-record-sets --hosted-zone-id ${zone} --change-batch 
 }'
 
 
-# Run the Ansible playbook
-cd /home/ubuntu/iX-rss-engine
-ansible-playbook -i 127.0.0.1, playbook.yml
 
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
 sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
@@ -149,3 +139,17 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
+
+# Run the Docker container with Ansible and execute the playbooks
+sudo docker run --rm \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /home/ubuntu:/home/ubuntu \
+  --network host \
+  --ulimit nofile=65536:65536 \
+  --ulimit nproc=65535 \
+  --ulimit memlock=-1 \
+  --privileged \
+  -e ANSIBLE_HOST_KEY_CHECKING=False \
+  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
+  demisto/ansible-runner:1.0.0.110653 \
+  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml"
