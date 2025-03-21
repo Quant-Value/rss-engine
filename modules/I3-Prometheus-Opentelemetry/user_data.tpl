@@ -56,7 +56,7 @@ aws route53 change-resource-record-sets \
 sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -e
-
+zone_id=${zone}
 private_ip=$(hostname -I | awk '{print $1}')
 record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
 echo "IP y record_name: $private_ip $record_name"

@@ -13,6 +13,7 @@
     - name: Instalar paquetes del sistema necesarios
       apt:
         name:
+          - dos2unix
           - unzip
           - apt-transport-https
           - ca-certificates

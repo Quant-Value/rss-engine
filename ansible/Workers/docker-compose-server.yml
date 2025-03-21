@@ -1,6 +1,6 @@
 services:
   myserver:
-    image: "flexvega/simple-worker"  # Imagen del contenedor
+    image: "flexvega/simple-worker:1.0.0-alpine"  # Imagen del contenedor
     container_name: "myserver"         # Nombre del contenedor
     network_mode: host                 # Usar la red del host
     restart: always                    # Política de reinicio para que siempre se reinicie el contenedor si falla
