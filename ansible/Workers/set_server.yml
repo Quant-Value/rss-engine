@@ -1,0 +1,97 @@
+---
+- name: Provisionar servidor para server
+  hosts: all
+  become: yes
+  tasks:
+    - name: Instalar dependencias
+      apt:
+        name:
+          - unzip
+          - curl
+          - ca-certificates
+          - dos2unix
+        state: present
+    - name: Verificar si AWS CLI está instalado
+      command: aws --version
+      register: aws_cli_installed
+      ignore_errors: true  # Ignora errores si AWS CLI no está instalado
+
+    - name: Instalar AWS CLI
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+      when: aws_cli_installed.rc != 0  # Solo se ejecuta si AWS CLI no está instalado
+
+
+    - name: Agregar el usuario 'ubuntu' al grupo 'docker'
+      user:
+        name: ubuntu
+        group: docker
+        append: yes
+
+    - name: Verificar si el usuario 'ubuntu' está en el grupo docker
+      command: groups ubuntu
+      register: user_groups
+      changed_when: false
+      failed_when: false
+
+    - name: Reiniciar el servicio Docker para aplicar los cambios de grupo
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: Iniciar sesión en ECR
+      shell: "aws ecr get-login-password --region eu-west-3 | sudo docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
+
+
+    - name: Descargar la imagen Docker del ECR
+      docker_image:
+        name: "248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:server-go"
+        source: pull
+
+    - name: Copy docker-compose
+      ansible.builtin.copy:
+        src: docker-compose-server.yml # Ruta de la plantilla
+        dest: /home/ubuntu/docker-compose.yml  # Ruta de destino
+        mode: '0644'
+
+
+    - name: Crear un archivo de servicio systemd para el contenedor Docker
+      copy:
+        content: |
+          [Unit]
+          Description=Docker Container for my ECR app
+          After=network.target
+
+          [Service]
+          # Ejecutar docker-compose pull para descargar las imágenes antes de levantar los contenedores
+          ExecStartPre=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml pull
+          # Iniciar los contenedores en segundo plano con docker-compose
+          ExecStart=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml up -d
+          # Detener los contenedores
+          ExecStop=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml down
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/mydockerapp.service
+        mode: '0644'
+
+    - name: Recargar los servicios systemd
+      systemd:
+        name: "mydockerapp.service"
+        daemon_reload: yes
+        enabled: yes
+        state: started
+    # Tarea 11: Detiene Elasticsearch usando Docker Compose
+    - name: Stop workers with Docker Compose
+      command: docker compose down
+      args:
+        chdir: /home/ubuntu
+
+    # Tarea 12: Inicia Elasticsearch en segundo plano utilizando Docker Compose
+    - name: Start workers with Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: /home/ubuntu
+
