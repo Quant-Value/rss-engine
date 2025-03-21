@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_key_pair" "key_pair" {
-  key_name   = "key_sw_stb"
+  key_name   = "i8-key-g2"
   public_key = file(var.public_key_path)
 }
 
@@ -18,7 +18,7 @@ resource "aws_instance" "ec2_instance" {
   tags = {
     Name = "simple worker server Grupo2",
     Grupo= "g2",
-    DNS_NAME="SW-SERVER"
+    DNS_NAME="i8-rss-engine-demo"
 
   }
 
@@ -30,20 +30,14 @@ resource "aws_instance" "ec2_instance" {
   # Asignar un rol a la instancia para acceder a ECR
   iam_instance_profile = aws_iam_instance_profile.ec2_role.name
   
+    user_data = templatefile("${path.module}/user_data_server.tpl", {
+    instance_id = "i8-${var.environment}"
+    record_name = "i8-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
+    zone=data.aws_route53_zone.my_hosted_zone.id
+  })
 
   depends_on = [aws_security_group.sg]
 }
 
-
-resource "null_resource" "write_config_server" {
-  depends_on = [aws_instance.ec2_instance]  # Asegurarse de que el ALB se haya creado antes de ejecutar esto
-
-  provisioner "local-exec" {
-    command ="echo SW_SERVER=${aws_instance.ec2_instance.public_ip} >> ../scripts/cloud/.env"
-  }
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-}
 
 
