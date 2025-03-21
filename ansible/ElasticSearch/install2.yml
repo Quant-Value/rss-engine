@@ -37,6 +37,7 @@
     - name: Generate seed_hosts excluding the node with the index
       set_fact:
         SEED_HOSTS_EXCLUDED: "{{ SEED_HOSTS | reject('equalto', EXCLUDE_HOST) | list }}"
+
     - name: Resolve DNS names to IPs using dig
       command: "dig +short {{ item }}"
       register: dig_output
@@ -45,7 +46,8 @@
 
     - name: Store resolved IPs
       set_fact:
-        SEED_HOSTS_IPS: "{{ SEED_HOSTS_IPS | default([]) + [dig_output.stdout] }}"
+        SEED_HOSTS_IPS: "{{ SEED_HOSTS_IPS | default([]) + [item.stdout] }}"
+      loop: "{{ dig_output.results }}"
 
     - name: Show resolved IPs
       debug:
