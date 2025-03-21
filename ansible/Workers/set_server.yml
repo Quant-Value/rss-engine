@@ -1,62 +1,22 @@
 ---
 - name: Provisionar servidor para server
-  hosts: all
+  hosts: localhost
+  connection: local
   become: yes
   tasks:
-    - name: Instalar dependencias
-      apt:
-        name:
-          - unzip
-          - curl
-          - ca-certificates
-          - dos2unix
-        state: present
-    - name: Verificar si AWS CLI está instalado
-      command: aws --version
-      register: aws_cli_installed
-      ignore_errors: true  # Ignora errores si AWS CLI no está instalado
+    - name: Clone repository from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git"
+        dest: "/tmp/imatia-rss-engine"
+        version: "main"
+        force: yes
 
-    - name: Instalar AWS CLI
-      shell: |
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
-      when: aws_cli_installed.rc != 0  # Solo se ejecuta si AWS CLI no está instalado
-
-
-    - name: Agregar el usuario 'ubuntu' al grupo 'docker'
-      user:
-        name: ubuntu
-        group: docker
-        append: yes
-
-    - name: Verificar si el usuario 'ubuntu' está en el grupo docker
-      command: groups ubuntu
-      register: user_groups
-      changed_when: false
-      failed_when: false
-
-    - name: Reiniciar el servicio Docker para aplicar los cambios de grupo
-      systemd:
-        name: docker
-        state: restarted
-
-    - name: Iniciar sesión en ECR
-      shell: "aws ecr get-login-password --region eu-west-3 | sudo docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
-
-
-    - name: Descargar la imagen Docker del ECR
-      docker_image:
-        name: "248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:server-go"
-        source: pull
-
-    - name: Copy docker-compose
+    - name: Copy docker-compose.yml file from repository
       ansible.builtin.copy:
-        src: docker-compose-server.yml # Ruta de la plantilla
-        dest: /home/ubuntu/docker-compose.yml  # Ruta de destino
-        mode: '0644'
-
-
+        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-server.yml"  
+        dest: "/home/ubuntu/docker-compose.yml"
+        mode: "0644"
+        
     - name: Crear un archivo de servicio systemd para el contenedor Docker
       copy:
         content: |
