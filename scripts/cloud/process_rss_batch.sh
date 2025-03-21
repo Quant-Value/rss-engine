@@ -2,10 +2,10 @@
 #set -x
 
 ES_USERNAME="elastic"
-ES_PASSWORD="fullmetal-grOSS.RT"
-source scripts/.env
+
+source .env
 #source .env
-INDEX_DEST="feed_items4"
+INDEX_DEST="feed_items_demo"
 
 
 
@@ -53,7 +53,7 @@ for url in "${URLS[@]}"; do
         item_url: .link,
         item_description: (.description // null)  # Si está vacío, asignamos null
     }]
-  }' | jq -c '.items[] | { "index": { "_index": "feed_items4" } } + {
+  }' | jq -c '.items[] | { "index": { "_index": "feed_items_demo" } } + {
       item_guid: .item_guid,
       item_title: .item_title,
       item_url: .item_url,
@@ -98,6 +98,6 @@ EOF
 
 echo $JSON > out.json
 # Enviar el JSON con métricas a Prometheus
-./scripts/metrics_rss.sh "$JSON"
+./metrics_rss.sh "$JSON"
 #./metrics_rss.sh "$JSON"
 echo "Proceso completado."
