@@ -22,13 +22,19 @@
       set_fact:
         elasticpass: "{{ secret_value.stdout | from_json | json_query('elasticpass') }}"
 
-    # Tarea 2: Generar lista de seed_hosts
-    - name: Generate seed_hosts list with DNS names
+    - name: Resolve DNS names to IPs using dig
+      command: "dig +short {{ item }}"
+      register: dig_output
+      loop: "{{ SEED_HOSTS }}"
+      when: SEED_HOSTS | length > 0
+
+    - name: Store resolved IPs
       set_fact:
-        SEED_HOSTS: "{{ SEED_HOSTS | default([]) + ['i' + (item|string) + '-demo-rss-engine-demo.campusdual.mkcampus.com'] }}"
-      with_sequence: start=0 end={{ lookup('env', 'NUM_NODES') | int - 1 }}
-      loop_control:
-        loop_var: item
+        SEED_HOSTS_IPS: "{{ SEED_HOSTS_IPS | default([]) + [dig_output.stdout] }}"
+
+    - name: Show resolved IPs
+      debug:
+        msg: "{{ SEED_HOSTS_IPS }}"
     
     - name: Generate excluded host
       set_fact:

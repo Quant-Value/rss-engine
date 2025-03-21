@@ -46,5 +46,6 @@ resource "aws_instance" "elasticsearch_nodes" {
     instance_id = "i${count.index}-${var.environment}"  # Pasar el ID de la instancia dinámicamente
     cantidad    = var.cantidad  # Pasar la variable cantidad al user_data.tpl
     index = count.index
+    zone=data.aws_route53_zone.my_hosted_zone.id
   })
 }
