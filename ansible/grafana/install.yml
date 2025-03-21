@@ -112,10 +112,10 @@
   become: yes
   tasks:
 
-  - name: Stop running containers with Docker Compose
-    command: docker compose down
-    args:
-      chdir: /home/ubuntu/grafana
+  # - name: Stop running containers with Docker Compose
+  #   command: docker compose down
+  #   args:
+  #     chdir: /home/ubuntu/grafana
 
   - name: Start containers with Docker Compose
     command: docker compose up -d
