@@ -1,15 +1,15 @@
-
 services:
   myserver:
-    image: "248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:server-go"  # Imagen del contenedor
-    container_name: "myserver"  # Nombre del contenedor
-    network_mode: host  # Usar la red del host (igual que en tu ejemplo)
-    restart: always  # Política de reinicio para que siempre se reinicie el contenedor si falla
+    image: "flexvega/simple-worker"  # Imagen del contenedor
+    container_name: "myserver"         # Nombre del contenedor
+    network_mode: host                 # Usar la red del host
+    restart: always                    # Política de reinicio para que siempre se reinicie el contenedor si falla
     ports:
-      - "8080:8080"  # Puedes exponer puertos si es necesario, por ejemplo para acceder a la aplicación desde el host
+      - "8080:8080"                   # Exponer puertos si es necesario
     deploy:
       resources:
         limits:
           cpus: '1.9'
-          memory: 3.8G  # Limitar la RAM a 1.8 GB
+          memory: 3.8G                # Limitar la RAM
+    entrypoint: ["app-bluengo-worker", "server"]
 
