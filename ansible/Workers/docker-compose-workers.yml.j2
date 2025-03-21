@@ -1,7 +1,7 @@
 
 services:
   my_worker:
-    image: 248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:worker-go
+    image: flexvega/simple-worker
     container_name: my_worker
     environment:
       - DOCKER_BUILDKIT=1
@@ -15,4 +15,5 @@ services:
           cpus: '0.9'
     restart: unless-stopped  # Para reiniciar el contenedor si falla
     working_dir: /app  # Directorio de trabajo del contenedor (similar a `chdir`)
+    entrypoint: ["app-bluengo-worker", "worker"]
     command: -server=http://{{ server_ip }}:8080 -slots=8
