@@ -15,6 +15,9 @@ resource "aws_iam_role" "ec2_role_i3" {
   })
 }
 
+
+
+
 resource "aws_iam_role_policy" "ec2_policy_i3" {
   name   = "ec2-docker-policy-i3"
   role   = aws_iam_role.ec2_role_i3.id
@@ -53,12 +56,12 @@ resource "aws_iam_role_policy" "ec2_policy_i3" {
       {
         Action   = "route53:ChangeResourceRecordSets"
         Effect   = "Allow"
-        Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+        Resource = data.aws_route53_zone.my_hosted_zone.arn
       },
       {
         Action   = "route53:ListResourceRecordSets"
         Effect   = "Allow"
-        Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+        Resource = data.aws_route53_zone.my_hosted_zone.arn
       }
     ]
   })

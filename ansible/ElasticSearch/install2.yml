@@ -38,6 +38,20 @@
       set_fact:
         SEED_HOSTS_EXCLUDED: "{{ SEED_HOSTS | reject('equalto', EXCLUDE_HOST) | list }}"
 
+    - name: Resolve DNS names to IPs using dig
+      command: "dig +short {{ item }}"
+      register: dig_output
+      loop: "{{ SEED_HOSTS }}"
+      when: SEED_HOSTS | length > 0
+
+    - name: Store resolved IPs
+      set_fact:
+        SEED_HOSTS_IPS: "{{ SEED_HOSTS_IPS | default([]) + [item.stdout] }}"
+      loop: "{{ dig_output.results }}"
+
+    - name: Show resolved IPs
+      debug:
+        msg: "{{ SEED_HOSTS_IPS }}"
 
     # Tarea 3: Verificar la lista generada de seed_hosts
     - name: Debug seed_hosts list

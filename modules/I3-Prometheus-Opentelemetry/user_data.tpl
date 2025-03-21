@@ -32,7 +32,7 @@ private_ip=$(hostname -I | awk '{print $1}')
 
 
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
-zone_id="Z06113313M7JJFJ9M7HM8"  # ID de tu zona de Route 53
+zone_id=${zone}  # ID de tu zona de Route 53
 record_name="${record_name}"
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
@@ -83,7 +83,7 @@ EOT
 )
 
 echo "JSON generado: $json"
-aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch "$json"
+aws route53 change-resource-record-sets --hosted-zone-id $zone_id --change-batch "$json"
 EOF
 
 

@@ -8,7 +8,7 @@ services:
       - cluster.name=demo-es-cluster
       - node.name=node-{{ EXCLUDE_HOST }}
       - discovery.seed_hosts={{ SEED_HOSTS| join(',') }}
-      - cluster.initial_master_nodes={{ SEED_HOSTS | join(',') }}
+      - cluster.initial_master_nodes={{ SEED_HOSTS_IPS | join(',') }}
       - ELASTIC_PASSWORD={{ elasticpass }}
       #- ELASTIC_USER=elastic
       - xpack.security.enabled=true # Deshabilitar seguridad
