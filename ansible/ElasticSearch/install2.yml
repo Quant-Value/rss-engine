@@ -21,7 +21,11 @@
     - name: Set the password as a variable
       set_fact:
         elasticpass: "{{ secret_value.stdout | from_json | json_query('elasticpass') }}"
-
+    
+    - name: Generate excluded host
+      set_fact:
+        EXCLUDE_HOST: "{{ ['i', INDEX_VAR, '-demo-rss-engine-demo.campusdual.mkcampus.com'] | join('') }}"
+        
     - name: Resolve DNS names to IPs using dig
       command: "dig +short {{ item }}"
       register: dig_output
@@ -35,10 +39,6 @@
     - name: Show resolved IPs
       debug:
         msg: "{{ SEED_HOSTS_IPS }}"
-    
-    - name: Generate excluded host
-      set_fact:
-        EXCLUDE_HOST: "{{ ['i', INDEX_VAR, '-demo-rss-engine-demo.campusdual.mkcampus.com'] | join('') }}"
     
     - name: Generate seed_hosts excluding the node with the index
       set_fact:

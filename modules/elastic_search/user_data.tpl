@@ -1,5 +1,12 @@
 #!/bin/bash
 # Actualizar paquetes e instalar dependencias
+LOG_FILE="/var/log/mi_script.log"
+
+# Función para agregar logs al archivo
+log_message() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
 
 sudo apt-get update -y
 sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
@@ -26,7 +33,7 @@ sudo docker --version
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
 sudo ./aws/install
-
+log_message "Instalacion basica terminada"
               # Obtener la IP privada
 private_ip=$(hostname -I | awk '{print $1}')
 # Leer los archivos para obtener los valores
@@ -53,7 +60,7 @@ aws route53 change-resource-record-sets \
                 }'
 
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
-
+log_message "Empieza registro route53"
 sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -e
@@ -113,6 +120,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
 
+log_message "Servicio route53"
+
 # Montar EFS
 sudo mkdir -p /mnt/efs
 sudo mount -t nfs4 fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs
@@ -122,6 +131,8 @@ echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 
 
 # Establecer los permisos correctos en el EFS
 sudo chown -R 1000:1000 /mnt/efs/
+
+log_message "EFS montado"
 
 ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
 cat /home/ubuntu/.ssh/id_rsa.pub >> /home/ubuntu/.ssh/authorized_keys
@@ -134,6 +145,8 @@ curl -o /home/ubuntu/install2.yml  https://raw.githubusercontent.com/campusduald
 
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
+
+log_message "Playbooks descargados y empezando a construir la imagen de ansible"
 
 sudo docker build -t ansible-local -f /home/ubuntu/Dockerfile.ansible  /home/ubuntu
 
@@ -149,6 +162,51 @@ hosts_file="/home/ubuntu/hosts.ini"
 # Generar el archivo hosts.ini
 echo "[webserver]" > $hosts_file
 echo "$private_ip ansible_user=ubuntu" >> $hosts_file
+
+log_message "Esperando a la resolucion correcta de dns"
+
+wait_for_dns_resolution() {
+  local dns_name=$1
+  local port=$2
+  local timeout=60  # Tiempo máximo de espera en segundos
+  local interval=5  # Intervalo entre verificaciones en segundos
+  local elapsed=0
+
+  log_message "Esperando a la resolución correcta de DNS para $dns_name en el puerto $port..."
+
+  # Resolver el DNS para obtener la IP
+  resolved_ip=$(dig +short "$dns_name")
+  
+  if [ -z "$resolved_ip" ]; then
+    log_message "No se pudo resolver el nombre DNS: $dns_name"
+    return 1
+  fi
+
+  log_message "La IP resuelta para $dns_name es: $resolved_ip"
+
+  # Esperar a que el puerto esté accesible
+  while ! nc -z -w 3 "$resolved_ip" "$port"; do
+    elapsed=$((elapsed + interval))
+    if [ $elapsed -ge $timeout ]; then
+      log_message "Timeout alcanzado después de $timeout segundos. No se pudo conectar al puerto $port en $resolved_ip."
+      return 1
+    fi
+
+    log_message "Esperando la conexión al puerto $port en $resolved_ip... (Intento $((elapsed / interval)))"
+    sleep $interval
+  done
+
+  log_message "Conexión exitosa al puerto $port en $resolved_ip."
+  return 0
+}
+
+# Uso de la función
+dns_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com"
+port=9300
+wait_for_dns_resolution "$dns_name" "$port"
+
+
+log_message "Ya solo falta ejecutar los playbooks"
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
 sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
