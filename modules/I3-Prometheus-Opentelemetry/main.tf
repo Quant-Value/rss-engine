@@ -18,6 +18,17 @@ data "aws_security_group" "default" {
   }
 }
 
+data "aws_vpc" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+}
+
+data "aws_route53_zone" "my_hosted_zone" {
+  name = "campusdual.mkcampus.com"  # Cambia este nombre por el nombre del dominio
+}
+
 resource "aws_instance" "ec2_node" {
   count           = var.instance_count
   #ami             = "ami-091f18e98bc129c4e" # Ubuntu 24 ami londres
@@ -46,5 +57,6 @@ resource "aws_instance" "ec2_node" {
   user_data = templatefile("${path.module}/user_data.tpl", {
     instance_id = "i3-${var.environment}"
     record_name = "i3-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
+    zone=data.aws_route53_zone.my_hosted_zone.id
   })
 }
