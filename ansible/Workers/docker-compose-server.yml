@@ -11,5 +11,5 @@ services:
         limits:
           cpus: '1.9'
           memory: 3.8G                # Limitar la RAM
-    entrypoint: ["app-bluengo-worker", "server"]
-
+    entrypoint: ["./app-bluengo-worker", "server"]
+  
