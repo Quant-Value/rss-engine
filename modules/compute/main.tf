@@ -28,7 +28,7 @@ resource "aws_instance" "ec2_instance_i8" {
   associate_public_ip_address = true
 
   # Asignar un rol a la instancia para acceder a ECR
-  iam_instance_profile = aws_iam_instance_profile.ec2_role_i5.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_role_i8.name
   
     user_data = templatefile("${path.module}/user_data_server.tpl", {
     instance_id = "i8-${var.environment}"
