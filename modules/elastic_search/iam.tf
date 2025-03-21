@@ -15,6 +15,15 @@ resource "aws_iam_role" "ec2_role_i0" {
   })
 }
 
+data "aws_route53_zone" "my_hosted_zone" {
+  name = "campusdual.mkcampus.com"  # Cambia este nombre por el nombre del dominio
+}
+data "aws_secretsmanager_secret" "my_secret" {
+  name = "rss-engine-imatia"  # Cambia este nombre por el nombre de tu secreto
+}
+
+
+
 resource "aws_iam_role_policy" "ec2_policy_i0" {
   name   = "ec2-docker-policy-i0"
   role   = aws_iam_role.ec2_role_i0.id
@@ -53,12 +62,19 @@ resource "aws_iam_role_policy" "ec2_policy_i0" {
       {
         Action   = "route53:ChangeResourceRecordSets"
         Effect   = "Allow"
-        Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+        #Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+        Resource = data.aws_route53_zone.my_hosted_zone.arn
       },
       {
         Action   = "route53:ListResourceRecordSets"
         Effect   = "Allow"
-        Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+        #Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
+        Resource = data.aws_route53_zone.my_hosted_zone.arn
+      },
+      {
+        Action: "secretsmanager:GetSecretValue",
+        Effect: "Allow",
+        Resource: data.aws_secretsmanager_secret.my_secret.arn
       }
     ]
   })

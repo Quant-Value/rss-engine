@@ -8,15 +8,24 @@
       debug:
         msg: "NUM_NODES is {{ lookup('env', 'NUM_NODES') }} and PRIVATE_IP is {{ lookup('env', 'PRIVATE_IP') }} and the index is {{ lookup('env', 'INDEX') }}"
 
-    # Tarea 1: Generar un nombre único para el nodo
-    - name: Generate unique NODE_NAME
-      set_fact:
-        NODE_NAME: "{{ lookup('env', 'PRIVATE_IP') | regex_replace('\\.', '-') }}-node-{{ inventory_hostname }}"
-
     # Cargar la variable INDEX desde el entorno y guardarla en una nueva variable
     - name: Set the INDEX variable
       set_fact:
         INDEX_VAR: "{{ lookup('env', 'INDEX') }}"
+
+    # Tarea 1: Generar un nombre único para el nodo
+    - name: Generate excluded host
+      set_fact:
+        NODE_NAME: "{{ ['node-','i', INDEX_VAR, '-demo-rss-engine-demo.campusdual.mkcampus.com'] | join('') }}"
+
+    - name: Retrieve secret from AWS Secrets Manager
+      command: >
+        aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text
+      register: secret_value
+
+    - name: Set the password as a variable
+      set_fact:
+        elasticpass: "{{ secret_value.stdout | from_json | json_query('elasticpass') }}"
 
     # Tarea 2: Generar lista de seed_hosts
     - name: Generate seed_hosts list with DNS names

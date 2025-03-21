@@ -135,11 +135,12 @@ sudo systemctl restart docker
 sudo docker build -t ansible-local -f /home/ubuntu/Dockerfile.ansible  /home/ubuntu
 
 sudo mkdir /home/ubuntu/ca
-sudo openssl genpkey -algorithm RSA -out /home/ubuntu/ca/ca.key -pkeyopt rsa_keygen_bits:2048
+#sudo openssl genpkey -algorithm RSA -out /home/ubuntu/ca/ca.key -pkeyopt rsa_keygen_bits:2048
 
-sudo openssl req -new -x509 -key /home/ubuntu/ca/ca.key -out /home/ubuntu/ca/ca.crt -days 3650 -subj "/C=US/ST=California/L=Los Angeles/O=MyOrg/OU=MyUnit/CN=example.com/emailAddress=email@example.com"
+#sudo openssl req -new -x509 -key /home/ubuntu/ca/ca.key -out /home/ubuntu/ca/ca.crt -days 3650 -subj "/C=US/ST=California/L=Los Angeles/O=MyOrg/OU=MyUnit/CN=example.com/emailAddress=email@example.com"
 
-
+aws s3 cp s3://proyecto-devops-grupo-dos-paris/certs-ssl/ /home/ubuntu/ca --recursive 
+#aws acm get-certificate --certificate-arn arn:aws:acm:eu-west-3:248189943700:certificate/d57d01fd-1847-4b43-b968-0af670c6461f --query "Certificate" --output text > ca.crt
 
 hosts_file="/home/ubuntu/hosts.ini"
 # Generar el archivo hosts.ini
