@@ -7,7 +7,7 @@ services:
     environment:
       - cluster.name=es-cluster
       - node.name=node-{{ EXCLUDE_HOST }}
-      - discovery.seed_hosts={{ SEED_HOSTS_EXCLUDED | join(',') }}
+      - discovery.seed_hosts={{ SEED_HOSTS| join(',') }}
       - cluster.initial_master_nodes={{ SEED_HOSTS | join(',') }}
       - ELASTIC_PASSWORD={{ elasticpass }}
       #- ELASTIC_USER=elastic
