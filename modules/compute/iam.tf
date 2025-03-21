@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_role_i5" {
-  name = "ec2-docker-role-i0"
+  name = "ec2-docker-role-i5"
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17"
@@ -24,8 +24,8 @@ data "aws_secretsmanager_secret" "my_secret" {
 
 
 resource "aws_iam_role_policy" "ec2_policy_i5" {
-  name   = "ec2-docker-policy-i0"
-  role   = aws_iam_role.ec2_role_i0.id
+  name   = "ec2-docker-policy-i5"
+  role   = aws_iam_role.ec2_role_i5.id
   policy = jsonencode({
     Version   = "2012-10-17"
     Statement = [
@@ -74,12 +74,18 @@ resource "aws_iam_role_policy" "ec2_policy_i5" {
         Action: "secretsmanager:GetSecretValue",
         Effect: "Allow",
         Resource: data.aws_secretsmanager_secret.my_secret.arn
+      },
+        # Add DescribeInstances permission
+      {
+        Action   = "ec2:DescribeInstances"
+        Effect   = "Allow"
+        Resource = "*"
       }
     ]
   })
 }
 
 resource "aws_iam_instance_profile" "ec2_role_i5" {
-  name = "ec2-docker-instance-profile-i0"
+  name = "ec2-docker-instance-profile-i5"
   role = aws_iam_role.ec2_role_i5.name
 }

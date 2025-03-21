@@ -175,25 +175,37 @@ wait_for_dns_resolution() {
   log_message "Esperando a la resolución correcta de DNS para $dns_name en el puerto $port..."
 
   # Esperar a que el puerto esté accesible
-  while ! nc -z -w 3 "$resolved_ip" "$port"; do
-      # Resolver el DNS para obtener la IP
+# Esperar a que el puerto esté accesible
+while true; do
+    # Resolver el DNS para obtener la IP
     resolved_ip=$(dig +short "$dns_name")
     
     if [ -z "$resolved_ip" ]; then
-      log_message "No se pudo resolver el nombre DNS: $dns_name"
-      return 1
+        log_message "No se pudo resolver el nombre DNS: $dns_name"
+        return 1
     fi
 
     log_message "La IP resuelta para $dns_name es: $resolved_ip"
-      elapsed=$((elapsed + interval))
+    
+    # Intentar la conexión al puerto con nc
+    nc -z -w 3 "$resolved_ip" "$port"
+    
+    if [ $? -eq 0 ]; then
+        log_message "Conexión exitosa al puerto $port en $resolved_ip."
+        break  # Salir del bucle si nc es exitoso
+    fi
+
+    # Incrementar el tiempo de espera y comprobar si se alcanzó el timeout
+    elapsed=$((elapsed + interval))
     if [ $elapsed -ge $timeout ]; then
-      log_message "Timeout alcanzado después de $timeout segundos. No se pudo conectar al puerto $port en $resolved_ip."
-      return 1
+        log_message "Timeout alcanzado después de $timeout segundos. No se pudo conectar al puerto $port en $resolved_ip."
+        return 1
     fi
 
     log_message "Esperando la conexión al puerto $port en $resolved_ip... (Intento $((elapsed / interval)))"
     sleep $interval
-  done
+done
+
 
   log_message "Conexión exitosa al puerto $port en $resolved_ip."
   return 0

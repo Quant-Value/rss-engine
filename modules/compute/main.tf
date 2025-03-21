@@ -8,15 +8,15 @@ resource "aws_key_pair" "key_pair" {
 }
 
 
-resource "aws_instance" "ec2_instance" {
+resource "aws_instance" "ec2_instance_i8" {
   ami           = var.ami_id
   instance_type = "t3.medium"
   key_name      = aws_key_pair.key_pair.key_name
-  subnet_id       = var.subnet_ids[0]
+  subnet_id       = var.subnet_ids
   disable_api_stop = false
 
   tags = {
-    Name = "simple worker server Grupo2",
+    Name = "i8 simple worker server Grupo2",
     Grupo= "g2",
     DNS_NAME="i8-rss-engine-demo"
 
@@ -28,7 +28,7 @@ resource "aws_instance" "ec2_instance" {
   associate_public_ip_address = true
 
   # Asignar un rol a la instancia para acceder a ECR
-  iam_instance_profile = aws_iam_instance_profile.ec2_role.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_role_i5.name
   
     user_data = templatefile("${path.module}/user_data_server.tpl", {
     instance_id = "i8-${var.environment}"

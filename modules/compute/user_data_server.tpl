@@ -1,6 +1,14 @@
 #!/bin/bash
+
 # Actualizar paquetes e instalar dependencias
-set -x
+LOG_FILE="/var/log/mi_script.log"
+
+# Función para agregar logs al archivo
+log_message() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+# Actualizar paquetes e instalar dependencias
+
 sudo apt-get update -y
 sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
 
@@ -26,8 +34,15 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 unzip awscliv2.zip
 sudo ./aws/install
 
+log_message "Instalacion basica terminada"
               # Obtener la IP privada
-public_ip=$(hostname -I | awk '{print $1}')
+instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=i8 simple worker server Grupo2" --query "Reservations[0].Instances[0].InstanceId" --output text)
+# Get IP addresses
+public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
+
+
+
+
 # Leer los archivos para obtener los valores
 
 
@@ -49,15 +64,16 @@ aws route53 change-resource-record-sets \
                     }
                   ]
                 }'
-
+log_message "Instalacion basica terminada"
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
 sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -e
-
-public_ip=$(hostname -I | awk '{print $1}')
+instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=i8 simple worker server Grupo2" --query "Reservations[0].Instances[0].InstanceId" --output text)
+# Get IP addresses
+public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
 echo "IP y record_name: $public_ip $record_name"
 
@@ -111,35 +127,70 @@ sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
 
-# Montar EFS
-sudo mkdir -p /mnt/efs
-sudo mount -t nfs4 fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs
-
-# Configurar el montaje persistente en fstab para reinicios
-echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 0 0' | sudo tee -a /etc/fstab
-
-# Establecer los permisos correctos en el EFS
-sudo chown -R 1000:1000 /mnt/efs/
-
-
-
+log_message "Instalacion basica terminada"
 # Añadir ubuntu a grupo docker y reiniciar servicio docker
 
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
+
+
+
+
+# Función para esperar la propagación de los cambios DNS
+
+log_message "Esperando a la resolucion correcta de dns"
+
+wait_for_dns_resolution() {
+  local dns_name=$1
+  local port=$2
+  local timeout=60  # Tiempo máximo de espera en segundos
+  local interval=5  # Intervalo entre verificaciones en segundos
+  local elapsed=0
+
+  log_message "Esperando a la resolución correcta de DNS para $dns_name en el puerto $port..."
+
+  # Esperar a que el puerto esté accesible
+  while ! nc -z -w 3 "$resolved_ip" "$port"; do
+      # Resolver el DNS para obtener la IP
+    resolved_ip=$(dig +short "$dns_name")
+    
+    if [ -z "$resolved_ip" ]; then
+      log_message "No se pudo resolver el nombre DNS: $dns_name"
+      return 1
+    fi
+
+    log_message "La IP resuelta para $dns_name es: $resolved_ip"
+      elapsed=$((elapsed + interval))
+    if [ $elapsed -ge $timeout ]; then
+      log_message "Timeout alcanzado después de $timeout segundos. No se pudo conectar al puerto $port en $resolved_ip."
+      return 1
+    fi
+
+    log_message "Esperando la conexión al puerto $port en $resolved_ip... (Intento $((elapsed / interval)))"
+    sleep $interval
+  done
+
+  log_message "Conexión exitosa al puerto $port en $resolved_ip."
+  return 0
+}
+
+# Uso de la función
+dns_name="${record_name}"
+port=22
+wait_for_dns_resolution "$dns_name" "$port"
+
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
-curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install.yml
-curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/install2.yml
-curl -o /home/ubuntu/Hash.py https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/Hash.py
+curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Workers/install.yml
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Workers/set_server.yml
+
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
 # de forma que se ejecuten de forma secuencial (en cascada).
 sudo docker run --rm \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /home/ubuntu:/home/ubuntu \
-  -v /mnt/efs:/mnt/efs \
   --network host \
   --ulimit nofile=65536:65536 \
   --ulimit nproc=65535 \
