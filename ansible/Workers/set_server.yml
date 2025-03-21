@@ -16,7 +16,7 @@
         src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-server.yml"  
         dest: "/home/ubuntu/docker-compose.yml"
         mode: "0644"
-        
+   
     - name: Crear un archivo de servicio systemd para el contenedor Docker
       copy:
         content: |
