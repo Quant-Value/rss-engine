@@ -23,7 +23,6 @@ data "aws_secretsmanager_secret" "my_secret" {
 }
 
 
-
 resource "aws_iam_role_policy" "ec2_policy_i5" {
   name   = "ec2-docker-policy-i0"
   role   = aws_iam_role.ec2_role_i0.id
