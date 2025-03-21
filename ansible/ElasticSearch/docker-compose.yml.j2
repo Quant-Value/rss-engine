@@ -6,7 +6,7 @@ services:
     network_mode: host
     environment:
       - cluster.name=es-cluster
-      - node.name={{ NODE_NAME }}
+      - node.name=node-{{ EXCLUDE_HOST }}
       - discovery.seed_hosts={{ SEED_HOSTS_EXCLUDED | join(',') }}
       - cluster.initial_master_nodes={{ SEED_HOSTS | join(',') }}
       - ELASTIC_PASSWORD={{ elasticpass }}
@@ -30,7 +30,7 @@ services:
       - "9300:9300"
     volumes:
       - type: bind
-        source: /data/{{ NODE_NAME }}
+        source: /data/node-{{ EXCLUDE_HOST }}
         target: /usr/share/elasticsearch/data
       - type: bind
         source: /mnt/efs/elasticsearch_snapshots
@@ -40,7 +40,7 @@ services:
         target: /certs
     user: "1000:1000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health","-u elastic:{{ elasticpass }}"]
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health","-u", "elastic:{{ elasticpass }}"]
       interval: 30s
       retries: 5
     deploy:

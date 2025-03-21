@@ -3,8 +3,8 @@ provider "random" {
 }
 
 resource "random_password" "example" {
-  length  = 18               # Longitud de la contraseña
-  special = true              # Incluir caracteres especiales como !, @, #, etc.
+  length  = 22               # Longitud de la contraseña
+  special = false              # Incluir caracteres especiales como !, @, #, etc.
   upper   = true              # Incluir letras mayúsculas
   lower   = true              # Incluir letras minúsculas
   numeric  = true              # Incluir números
