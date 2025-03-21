@@ -27,7 +27,9 @@ resource "aws_instance" "public_ec2" {
   associate_public_ip_address = true
 
   user_data = templatefile("${path.module}/user_data.tpl", {
-    instance_id = "-rss-engine-demo"
+    inumber = "i4"
+    suffix_name = "-rss-engine-demo"
+    zone = var.hosted_zone
   })
 
   depends_on = [aws_security_group.sg]

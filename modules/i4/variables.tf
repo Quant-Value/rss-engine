@@ -26,3 +26,8 @@ variable "vpc_id" {
 #   type = string
 #   default = "-rss-engine-demo"
 # }
+
+variable "hosted_zone" {
+  type = string
+  default = "Z06113313M7JJFJ9M7HM8"
+}

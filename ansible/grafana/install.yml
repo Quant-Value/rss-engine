@@ -54,6 +54,13 @@
       state: started
       enabled: yes
 
+  - name: Install Docker Compose
+    become: yes
+    apt:
+      name: docker-compose
+      state: latest
+      update_cache: yes
+
   - name: Add remote "demisto" user to "docker" group
     user:
       name: demisto
