@@ -127,6 +127,6 @@
   #     chdir: /home/ubuntu/grafana
 
   - name: Start containers with Docker Compose
-    command: /home/ubuntu/grafana/config/docker-compose up -d
+    command: /home/ubuntu/grafana/config/docker-compose.yml up -d
     args:
       chdir: /home/ubuntu/grafana/config
