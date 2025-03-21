@@ -118,6 +118,6 @@
   #     chdir: /home/ubuntu/grafana
 
   - name: Start containers with Docker Compose
-    command: docker compose up -d
+    command: docker-compose up -d
     args:
-      chdir: /home/ubuntu/grafana
+      chdir: /home/ubuntu/grafana/config
