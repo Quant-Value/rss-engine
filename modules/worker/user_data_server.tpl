@@ -36,7 +36,8 @@ sudo ./aws/install
 
 log_message "Instalacion basica terminada"
               # Obtener la IP privada
-instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:Name,Values=i8 simple worker server Grupo2" --query "Reservations[0].Instances[0].InstanceId" --output text)
+private_ip=$(hostname -I | awk '{print $1}')
+instance_id=$(aws ec2 describe-instances --filters  "Name=private-ip-address,Values=$private_ip" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
 public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 

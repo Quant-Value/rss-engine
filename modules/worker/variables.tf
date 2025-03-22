@@ -1,8 +1,7 @@
-variable "region" {
-  description = "AWS region"
-  type=string
-  default = "eu-west-3"
-
+variable "aws_region" {
+  type        = string
+  description = "Región de AWS"
+  default     = "eu-west-3"
 }
 
 variable "ami_id" {

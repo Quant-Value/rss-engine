@@ -100,6 +100,15 @@ resource "null_resource" "update_scripts_workers" {
   depends_on=[aws_instance.ec2_instance_wk]
 }
 */
+provider "aws" {
+  region = var.aws_region  # o la región correspondiente
+}
+
+resource "aws_key_pair" "key" {
+  key_name   = "i5-key-g2"
+  public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
+}
+
 resource "random_integer" "example" {
   min = 1   # The minimum value (inclusive)
   max = 100 # The maximum value (inclusive)
@@ -111,17 +120,18 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   ami             = var.ami_id
   instance_type   = "t2.micro"
   subnet_id       = var.subnet_ids[((random_integer.example.result+count.index)%3)]
-  key_name        = aws_key_pair.key_pair.key_name
+  key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
 
   tags = {
-    Name  = "SW worker number ${count.index + 5} Grupo2"
+    Name  = "SW worker i${count.index + 5} Grupo2"
     Grupo = "g2"
+    DNS_NAME="i${count.index + 5}-rss-engine-demo"
   }
 
   vpc_security_group_ids = [aws_security_group.sg.id]
   associate_public_ip_address = true
-  iam_instance_profile = aws_iam_instance_profile.ec2_role.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_role_i5.name
 
   user_data = templatefile("${path.module}/user_data_server.tpl", {
     instance_id = "i${count.index + 5}-${var.environment}"
@@ -130,7 +140,8 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   })
 
   # Aquí no necesitamos provisioner "remote-exec", sino que usaremos Ansible
-  depends_on = [aws_security_group.sg,aws_instance.ec2_instance]
+  depends_on = [ aws_security_group.sg ]
+  #depends_on = [aws_security_group.sg,aws_instance.ec2_instance]
 }
 
 
