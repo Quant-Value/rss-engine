@@ -35,8 +35,6 @@ sudo docker --version
 # Install Docker Compose
 sudo apt-get install -y docker-compose
 
-# Install Ansible
-sudo apt install -y ansible
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
@@ -48,7 +46,7 @@ sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
 
-instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
+instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
 PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 
@@ -77,11 +75,11 @@ sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -e
 
-instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
+instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
 
 PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 
-PRIVATE_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PrivateIpAddress" --output text --region eu-west-3)
+
 
 record_name="i4-rss-engine-demo.campusdual.mkcampus.com"
 
@@ -95,20 +93,6 @@ aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 -
                 "Type": "A",
                 "TTL": 60,
                 "ResourceRecords": [{"Value": "'$PUBLIC_IP'"}]
-            }
-        }
-    ]
-}'
-
-aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch '{
-    "Changes": [
-        {
-            "Action": "UPSERT",
-            "ResourceRecordSet": {
-                "Name": "'$record_name'",
-                "Type": "A",
-                "TTL": 60,
-                "ResourceRecords": [{"Value": "'$PRIVATE_IP'"}]
             }
         }
     ]
@@ -139,6 +123,10 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
+
+# Añadir ubuntu a grupo docker y reiniciar servicio docker
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
 
 # Run the Docker container with Ansible and execute the playbooks
 sudo docker run --rm \
