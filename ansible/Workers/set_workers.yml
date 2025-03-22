@@ -13,7 +13,7 @@
 
     - name: Copy docker-compose.yml file from repository
       ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/scripts/"
+        src: "/tmp/imatia-rss-engine/scripts/cloud/"
         dest: "/home/ubuntu/scripts/"
         mode: "0644"
 
