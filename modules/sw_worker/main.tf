@@ -13,7 +13,9 @@ resource "random_integer" "example" {
   max = 100 # The maximum value (inclusive)
 }
 
-
+locals{ # cambiar esto por un output
+  sw_server_dns_name="i8-demo-rss-engine-demo.campusdual.mkcampus.com"
+}
 resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no puedes directamente vpc y si no se crea en la vpc default
   count           = var.amount
   ami             = var.ami_id
@@ -36,6 +38,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
     instance_id = "i${count.index + 5}-${var.environment}"
     record_name = "i${count.index + 5}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
     zone=data.aws_route53_zone.my_hosted_zone.id
+    sw_server_dns_name=local.sw_server_dns_name #cambiar esto por un output
   })
 
   # Aquí no necesitamos provisioner "remote-exec", sino que usaremos Ansible
