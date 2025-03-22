@@ -8,12 +8,20 @@ source .env
 INDEX_DEST="feed_items_demo"
 
 
+# Comprobar si se ha proporcionado el archivo como argumento
+if [ -z "$1" ]; then
+  echo "Error: Debes proporcionar el nombre del archivo JSON como argumento."
+  exit 1
+fi
 
-#echo $1
-# Leer las URLs desde el archivo JSON
-# Leer el JSON del primer argumento
+# Leer el contenido del archivo JSON y parsearlo usando jq
+archivo_json="$1"
+
+# Leer las URLs desde el archivo JSON y convertirlas en un array de Bash
+IFS=$'\n' read -rd '' -a URLS <<< "$(jq -r '.urls[]' "$archivo_json")"
+
 # Leer las URLs desde el archivo JSON y convertir en un array de Bash
-IFS=$'\n' read -rd '' -a URLS <<< "$(echo "$1" | jq -r '.urls[]')"
+#IFS=$'\n' read -rd '' -a URLS <<< "$(echo "$1" | jq -r '.urls[]')"
 
 #echo $URLS
 total_urls=0
@@ -101,3 +109,5 @@ echo $JSON > out.json
 ./metrics_rss.sh "$JSON"
 #./metrics_rss.sh "$JSON"
 echo "Proceso completado."
+
+rm "$archivo_json"

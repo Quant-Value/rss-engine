@@ -1,109 +1,38 @@
 ---
 - name: Configuración de Instancia EC2 Worker
-  hosts: all
+  hosts: localhost
+  connection: local
   become: yes
   tasks:
-    - name: Instalar dependencias
-      apt:
-        name:
-          - unzip
-          - curl
-          - ca-certificates
-          - dos2unix
-        state: present
+    - name: Clone repository from GitHub
+      ansible.builtin.git:
+        repo: "https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git"
+        dest: "/tmp/imatia-rss-engine"
+        version: "main"
+        force: yes
 
-    - name: Verificar si AWS CLI está instalado
-      command: aws --version
-      register: aws_cli_installed
-      ignore_errors: true  # Ignora errores si AWS CLI no está instalado
-
-    - name: Instalar AWS CLI
-      shell: |
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
-      when: aws_cli_installed.rc != 0  # Solo se ejecuta si AWS CLI no está instalado
-
-        
-    - name: Agregar el usuario 'ubuntu' al grupo 'docker'
-      user:
-        name: ubuntu
-        group: docker
-        append: yes
-
-    - name: Verificar si el usuario 'ubuntu' está en el grupo docker
-      command: groups ubuntu
-      register: user_groups
-      changed_when: false
-      failed_when: false
-
-
-    - name: Reiniciar el servicio Docker
-      systemd:
-        name: docker
-        state: restarted
-
-    - name: Iniciar sesión en ECR
-      shell: "aws ecr get-login-password --region eu-west-3 | sudo docker login --username AWS --password-stdin 248189943700.dkr.ecr.eu-west-3.amazonaws.com"
-
-
-    - name: Descargar la imagen de Docker
-      docker_image:
-        name: "248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:worker-go"
-        source: pull
-
-    - name: Copy scripts
+    - name: Copy docker-compose.yml file from repository
       ansible.builtin.copy:
-        src: ../../../scripts/cloud/  # Ruta de la plantilla
-        dest: /home/ubuntu/scripts/   # Ruta de destino
-        mode: '0644'
-      # Tarea 2: Genera el archivo docker-compose.yml a partir de la plantilla
+        src: "/tmp/imatia-rss-engine/scripts/cloud/"
+        dest: "/home/ubuntu/scripts/"
+        mode: "0644"
+
     - name: Aplicar dos2unix a los archivos .sh copiados
       shell: |
-          sudo dos2unix /home/ubuntu/scripts/*.sh
+        dos2unix /home/ubuntu/scripts/*.sh
 
     - name: Generate docker-compose.yml from template
       template:
-        src: ./docker-compose-workers.yml.j2     # Ruta de la plantilla
-        dest: /home/ubuntu/docker-compose.yml    # Ruta de destino
-        mode: '0644'
-      # Tarea 2: Genera el archivo docker-compose.yml a partir de la plantilla
-
-
-
-
-    - name: Crear archivo de servicio systemd
-      copy:
-        content: |
-          [Unit]
-          Description=Docker Container for Worker
-          After=network.target
-
-          [Service]
-          ExecStartPre=/usr/bin/docker pull 248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:worker-go
-          ExecStart=/usr/local/bin/docker-compose -f /home/ubuntu/docker-compose.yml up -d
-          ExecStop=/usr/local/bin/docker-compose -f /home/ubuntu/docker-compose.yml down
-          #ExecStopPost=/usr/bin/docker rm $(/usr/bin/docker ps -aq --filter ancestor=248189943700.dkr.ecr.eu-west-3.amazonaws.com/grupo2:worker-go)
-
-          [Install]
-          WantedBy=multi-user.target
-        dest: "/etc/systemd/system/myworkerapp-{{ inventory_hostname }}.service"
+        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-workers.yml.j2"
+        dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
 
-    - name: Recargar systemd y habilitar el servicio
-      systemd:
-        name: "myworkerapp-{{ inventory_hostname }}.service"
-        daemon_reload: yes
-        enabled: yes
-        state: started
-    # Tarea 11: Detiene Elasticsearch usando Docker Compose
-    - name: Stop workers with Docker Compose
+    - name: Detiene Elasticsearch usando Docker Compose
       command: docker compose down
       args:
         chdir: /home/ubuntu
 
-    # Tarea 12: Inicia Elasticsearch en segundo plano utilizando Docker Compose
-    - name: Start workers with Docker Compose
+    - name: Inicia Elasticsearch en segundo plano utilizando Docker Compose
       command: docker compose up -d
       args:
         chdir: /home/ubuntu
@@ -118,6 +47,5 @@
       loop:
         - job.sh
         - upload.sh
-        #- process_rss.sh
         - process_rss_batch.sh
         - metrics_rss.sh

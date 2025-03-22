@@ -28,5 +28,11 @@ urls_json=$(cat "$archivo_temp" | grep "http*" | jq -R . | jq -s '{urls: .}')
 #formato esperado {"urls": ["",""]}
 
 rm "$archivo_temp"
-./process_rss_batch.sh "$urls_json"
+
+archivo_temp2=$(mktemp)
+
+echo "$urls_json" > $archivo_temp2
+
+./process_rss_batch.sh "$archivo_temp2"
+
 echo "Proceso completado."
