@@ -107,7 +107,7 @@ resource "random_integer" "example" {
 
 
 resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no puedes directamente vpc y si no se crea en la vpc default
-  count           = 2
+  count           = 3
   ami             = var.ami_id
   instance_type   = "t2.micro"
   subnet_id       = var.subnet_ids[((random_integer.example.result+count.index)%3)]
@@ -115,7 +115,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   disable_api_stop = false
 
   tags = {
-    Name  = "SW worker number ${count.index} Grupo2"
+    Name  = "SW worker number ${count.index + 5} Grupo2"
     Grupo = "g2"
   }
 
@@ -123,6 +123,11 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   associate_public_ip_address = true
   iam_instance_profile = aws_iam_instance_profile.ec2_role.name
 
+  user_data = templatefile("${path.module}/user_data_server.tpl", {
+    instance_id = "i${count.index + 5}-${var.environment}"
+    record_name = "i${count.index + 5}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
+    zone=data.aws_route53_zone.my_hosted_zone.id
+  })
 
   # Aquí no necesitamos provisioner "remote-exec", sino que usaremos Ansible
   depends_on = [aws_security_group.sg,aws_instance.ec2_instance]

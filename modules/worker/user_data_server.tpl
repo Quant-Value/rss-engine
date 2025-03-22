@@ -71,7 +71,8 @@ log_message "Instalacion basica terminada"
 sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -e
-instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=i8 simple worker server Grupo2" --query "Reservations[0].Instances[0].InstanceId" --output text)
+zone_id=${zone}
+instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:Name,Values=i8 simple worker server Grupo2" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
 public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
@@ -122,16 +123,30 @@ EOF
 
 
 
+# Crear un servicio systemd para el contenedor Docker (Para los contenedores)
+
+sudo tee /etc/systemd/system/mydockerapp.service > /dev/null <<'EOF'
+[Unit]
+Description=Docker Container for my ECR app
+After=network.target
+
+[Service]
+# Iniciar los contenedores en segundo plano
+ExecStart=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml up -d 
+# Detener los contenedores
+ExecStop=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
               # Habilitar el servicio para que se ejecute al iniciar la instancia
 sudo systemctl daemon-reload
+sudo systemctl enable mydockerapp.service
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
 
 log_message "Instalacion basica terminada"
-# Añadir ubuntu a grupo docker y reiniciar servicio docker
-
-sudo usermod -aG docker ubuntu
-sudo systemctl restart docker
 
 # Función para esperar la propagación de los cambios DNS
 
@@ -189,7 +204,18 @@ wait_for_dns_resolution "$dns_name" "$port"
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
-curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Workers/set_server.yml
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Workers/set_workersyml
+
+# Añadir ubuntu a grupo docker y reiniciar servicio docker
+
+sudo usermod -aG docker ubuntu
+sudo systemctl restart docker
+
+# Esperar a que Docker esté completamente activo antes de continuar
+while ! systemctl is-active --quiet docker; do
+  echo "Esperando a que Docker esté activo..."
+  sleep 2
+done
 
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,

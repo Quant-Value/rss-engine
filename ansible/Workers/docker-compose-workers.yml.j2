@@ -1,7 +1,7 @@
 
 services:
   my_worker:
-    image: flexvega/simple-worker
+    image: flexvega/simple-worker:1.0.0-alpine
     container_name: my_worker
     environment:
       - DOCKER_BUILDKIT=1
@@ -15,5 +15,5 @@ services:
           cpus: '0.9'
     restart: unless-stopped  # Para reiniciar el contenedor si falla
     working_dir: /app  # Directorio de trabajo del contenedor (similar a `chdir`)
-    entrypoint: ["app-bluengo-worker", "worker"]
+    entrypoint: ["./app-bluengo-worker", "worker"]
     command: -server=http://{{ server_ip }}:8080 -slots=8
