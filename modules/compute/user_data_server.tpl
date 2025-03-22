@@ -123,16 +123,30 @@ EOF
 
 
 
+# Crear un servicio systemd para el contenedor Docker (Para los contenedores)
+
+sudo tee /etc/systemd/system/mydockerapp.service > /dev/null <<'EOF'
+[Unit]
+Description=Docker Container for my ECR app
+After=network.target
+
+[Service]
+# Iniciar los contenedores en segundo plano
+ExecStart=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml up -d 
+# Detener los contenedores
+ExecStop=/usr/bin/docker compose -f /home/ubuntu/docker-compose.yml down
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
               # Habilitar el servicio para que se ejecute al iniciar la instancia
 sudo systemctl daemon-reload
+sudo systemctl enable mydockerapp.service
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
 
 log_message "Instalacion basica terminada"
-# Añadir ubuntu a grupo docker y reiniciar servicio docker
-
-sudo usermod -aG docker ubuntu
-sudo systemctl restart docker
 
 # Función para esperar la propagación de los cambios DNS
 
@@ -196,6 +210,13 @@ curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualde
 
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
+
+# Esperar a que Docker esté completamente activo antes de continuar
+while ! systemctl is-active --quiet docker; do
+  echo "Esperando a que Docker esté activo..."
+  sleep 2
+done
+
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
 # de forma que se ejecuten de forma secuencial (en cascada).
