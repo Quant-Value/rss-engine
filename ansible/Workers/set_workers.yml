@@ -17,27 +17,22 @@
         dest: "/home/ubuntu/scripts/"
         mode: "0644"
 
-   
     - name: Aplicar dos2unix a los archivos .sh copiados
       shell: |
-          sudo dos2unix /home/ubuntu/scripts/*.sh
+        sudo dos2unix /home/ubuntu/scripts/*.sh
 
     - name: Generate docker-compose.yml from template
       template:
-        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-workers.yml.j2"     # Ruta de la plantilla
-        dest: /home/ubuntu/docker-compose.yml    # Ruta de destino
+        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-workers.yml.j2"
+        dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
 
-
-
-    # Tarea 11: Detiene Elasticsearch usando Docker Compose
-    - name: Stop workers with Docker Compose
+    - name: Detiene Elasticsearch usando Docker Compose
       command: docker compose down
       args:
         chdir: /home/ubuntu
 
-    # Tarea 12: Inicia Elasticsearch en segundo plano utilizando Docker Compose
-    - name: Start workers with Docker Compose
+    - name: Inicia Elasticsearch en segundo plano utilizando Docker Compose
       command: docker compose up -d
       args:
         chdir: /home/ubuntu
@@ -52,6 +47,5 @@
       loop:
         - job.sh
         - upload.sh
-        #- process_rss.sh
         - process_rss_batch.sh
         - metrics_rss.sh
