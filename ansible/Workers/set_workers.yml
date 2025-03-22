@@ -19,7 +19,7 @@
 
     - name: Aplicar dos2unix a los archivos .sh copiados
       shell: |
-        sudo dos2unix /home/ubuntu/scripts/*.sh
+        dos2unix /home/ubuntu/scripts/*.sh
 
     - name: Generate docker-compose.yml from template
       template:
