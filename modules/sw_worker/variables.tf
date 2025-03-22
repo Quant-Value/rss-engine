@@ -39,3 +39,7 @@ variable "environment" {
   description = "Ambiente (dev/prod)"
   default     = "dev"
 }
+variable "amount"{
+  type=number
+  default=3
+}

@@ -1,14 +1,14 @@
 
 services:
   my_worker:
-    image: flexvega/simple-worker:1.0.0-alpine
+    build .
     container_name: my_worker
     environment:
       - DOCKER_BUILDKIT=1
       #- SERVER=http://{{ server_ip }}:8080  # Puedes reemplazar esta variable en el entorno o definirla fuera del compose
     volumes:
-      - ./scripts:/app/scripts
-      - ~/.aws:/.aws
+      - /home/ubuntu/scripts:/app/scripts
+      - /home/ubuntu/.aws:/.aws
     deploy:
       resources:
         limits:

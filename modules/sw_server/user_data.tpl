@@ -206,8 +206,8 @@ wait_for_dns_resolution "$dns_name" "$port"
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
-curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Workers/set_server.yml
-
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Server/set_server.yml
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Server/docker-compose-server.yml
 # Añadir ubuntu a grupo docker y reiniciar servicio docker
 
 sudo usermod -aG docker ubuntu

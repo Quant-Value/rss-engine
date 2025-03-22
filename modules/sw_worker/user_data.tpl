@@ -206,7 +206,7 @@ wait_for_dns_resolution "$dns_name" "$port"
 # Descargar el playbook de Ansible
 # Descargar los tres playbooks desde GitHub
 curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
-curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Workers/set_workers.yml
+curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/set_workers.yml
 
 # Añadir ubuntu a grupo docker y reiniciar servicio docker
 
@@ -218,6 +218,9 @@ while ! systemctl is-active --quiet docker; do
   echo "Esperando a que Docker esté activo..."
   sleep 2
 done
+
+
+
 
 
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
@@ -232,6 +235,7 @@ sudo docker run --rm \
   --privileged \
   -e ANSIBLE_HOST_KEY_CHECKING=False \
   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
+  -e server_ip=${sw_server_dns_name}
   demisto/ansible-runner:1.0.0.110653 \
   sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/install2.yml"
 

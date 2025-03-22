@@ -1,0 +1,12 @@
+
+---
+- name: Provisionar servidor para server
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+
+    - name: Start workers with Docker Compose
+      command: docker compose up -d
+      args:
+        chdir: /home/ubuntu
