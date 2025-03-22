@@ -23,14 +23,15 @@
 
     - name: Generate docker-compose.yml from template
       template:
-        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-workers.yml.j2"
+        src: "/tmp/imatia-rss-engine/ansible/SW_Worker/docker-compose-workers.yml.j2"
         dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
-
-    - name: Detiene Elasticsearch usando Docker Compose
-      command: docker compose down
-      args:
-        chdir: /home/ubuntu
+        
+    - name: Copy dockerfile
+      ansible.builtin.copy:
+        src: "/tmp/imatia-rss-engine/ansible/dockerifles/Dockerfile.worker"
+        dest: /home/ubuntu/Dockerfile
+        mode: '0644'
 
     - name: Inicia Elasticsearch en segundo plano utilizando Docker Compose
       command: docker compose up -d

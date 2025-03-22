@@ -5,25 +5,7 @@
   connection: local
   become: yes
   tasks:
-    - name: Clone repository from GitHub
-      ansible.builtin.git:
-        repo: "https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git"
-        dest: "/tmp/imatia-rss-engine"
-        version: "main"
-        force: yes
 
-    - name: Copy docker-compose.yml file from repository
-      ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/ansible/Workers/docker-compose-server.yml"
-        dest: "/home/ubuntu/docker-compose.yml"
-        mode: "0644"
-    # Tarea 11: Detiene Elasticsearch usando Docker Compose
-    - name: Stop workers with Docker Compose
-      command: docker compose down
-      args:
-        chdir: /home/ubuntu
-
-    # Tarea 12: Inicia Elasticsearch en segundo plano utilizando Docker Compose
     - name: Start workers with Docker Compose
       command: docker compose up -d
       args:
