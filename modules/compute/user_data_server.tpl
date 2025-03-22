@@ -73,7 +73,8 @@ sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 #!/bin/bash
 set -e
 zone_id=${zone}
-instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:Name,Values=i8 simple worker server Grupo2" --query "Reservations[0].Instances[0].InstanceId" --output text)
+private_ip=$(hostname -I | awk '{print $1}')
+instance_id=$(aws ec2 describe-instances --filters  "Name=private-ip-address,Values=$private_ip" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
 public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
