@@ -4,8 +4,8 @@ services:
     container_name: grafana
     restart: unless-stopped
     volumes:
-      # - "/mnt/efs/grafana:/var/lib/grafana"
-      - "/home/ubuntu/grafana:/var/lib/grafana"
+      # - "/mnt/efs/grafana:/grafana"
+      - "/home/ubuntu/grafana:/grafana"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     ports:
