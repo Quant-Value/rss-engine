@@ -38,7 +38,8 @@ sudo apt-get install -y docker-compose
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
-curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install.yml
+curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
+curl -o /home/ubuntu/playbooks/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/install2.yml
 
 
 #Añadir ubuntu a grupo docker y reiniciar servicio docker
@@ -51,22 +52,22 @@ instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Val
 PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 
 record_name="$(cat /etc/rss-engine-name)$(cat /etc/rss-engine-dns-suffix)"
-
+zone_id=${zone}
 
 # Set Route 53 DNS records for the EC2 instance (Public and Private IPs)
-aws route53 change-resource-record-sets --hosted-zone-id ${zone} --change-batch '{
-    "Changes": [
+aws route53 change-resource-record-sets --hosted-zone-id $zone_id --change-batch "{
+    \"Changes\": [
         {
-            "Action": "UPSERT",
-            "ResourceRecordSet": {
-                "Name": "'$record_name'",
-                "Type": "A",
-                "TTL": 60,
-                "ResourceRecords": [{"Value": "'$PUBLIC_IP'"}]
+            \"Action\": \"UPSERT\",
+            \"ResourceRecordSet\": {
+                \"Name\": \"$record_name\",
+                \"Type\": \"A\",
+                \"TTL\": 60,
+                \"ResourceRecords\": [{\"Value\": \"$PUBLIC_IP\"}]
             }
         }
     ]
-}'
+}"
 
 
 
@@ -82,21 +83,21 @@ PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Re
 
 
 record_name="i4-rss-engine-demo.campusdual.mkcampus.com"
+zone_id=${zone}
 
-
-aws route53 change-resource-record-sets --hosted-zone-id Z06113313M7JJFJ9M7HM8 --change-batch '{
-    "Changes": [
+aws route53 change-resource-record-sets --hosted-zone-id $zone_id --change-batch "{
+    \"Changes\": [
         {
-            "Action": "UPSERT",
-            "ResourceRecordSet": {
-                "Name": "'$record_name'",
-                "Type": "A",
-                "TTL": 60,
-                "ResourceRecords": [{"Value": "'$PUBLIC_IP'"}]
+            \"Action\": \"UPSERT\",
+            \"ResourceRecordSet\": {
+                \"Name\": \"$record_name\",
+                \"Type\": \"A\",
+                \"TTL\": 60,
+                \"ResourceRecords\": [{\"Value\": \"$PUBLIC_IP\"}]
             }
         }
     ]
-}'
+}"
 EOF
 
 
@@ -140,4 +141,4 @@ sudo docker run --rm \
   -e ANSIBLE_HOST_KEY_CHECKING=False \
   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
   demisto/ansible-runner:1.0.0.110653 \
-  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml"
+  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install2.yml"
