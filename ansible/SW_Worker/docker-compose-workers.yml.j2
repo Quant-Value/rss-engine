@@ -1,7 +1,7 @@
 
 services:
   my_worker:
-    image: flexvega/simple-worker:1.0.0-alpine
+    build .
     container_name: my_worker
     environment:
       - DOCKER_BUILDKIT=1
