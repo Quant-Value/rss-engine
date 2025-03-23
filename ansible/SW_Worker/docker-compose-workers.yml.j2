@@ -13,6 +13,6 @@ services:
       limits:
         cpus: '0.9'
   restart: unless-stopped  # Para reiniciar el contenedor si falla
-  working_dir: /app  # Directorio de trabajo del contenedor (similar a `chdir`)
+  working_dir: /app  
   entrypoint: ["./app-bluengo-worker", "worker"]
   command: -server=http://{{ server_ip }}:8080 -slots=8
