@@ -129,16 +129,19 @@ sudo systemctl start update-dns.service
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
+curl -o /home/ubuntu/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/docker-compose.yml
+
+docker compose -f /home/ubuntu/docker-compose.yml up -d
 # Run the Docker container with Ansible and execute the playbooks
-sudo docker run --rm \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /home/ubuntu:/home/ubuntu \
-  --network host \
-  --ulimit nofile=65536:65536 \
-  --ulimit nproc=65535 \
-  --ulimit memlock=-1 \
-  --privileged \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  demisto/ansible-runner:1.0.0.110653 \
-  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install2.yml"
+#sudo docker run --rm \
+#  -v /var/run/docker.sock:/var/run/docker.sock \
+#  -v /home/ubuntu:/home/ubuntu \
+#  --network host \
+#  --ulimit nofile=65536:65536 \
+#  --ulimit nproc=65535 \
+#  --ulimit memlock=-1 \
+#  --privileged \
+#  -e ANSIBLE_HOST_KEY_CHECKING=False \
+#  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
+#  demisto/ansible-runner:1.0.0.110653 \
+#  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/playbooks/install2.yml"

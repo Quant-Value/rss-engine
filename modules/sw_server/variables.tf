@@ -15,13 +15,13 @@ variable "ami_id" {
 variable "private_key_path" {
   description = "Ruta al archivo de la clave privada SSH para acceder a las instancias EC2."
   type        = string
-  default = "/home/jorge/Documentos/Bootcamp/Grupo/Prometheus_lab/my-ec2-key"
+  default = "../../my-ec2-key"
 }
 
 variable "public_key_path" {
   description = "Ruta al archivo de la clave pública SSH asociada a la clave privada para acceder a las instancias EC2."
   type        = string
-  default = "/home/jorge/Documentos/Bootcamp/Grupo/Prometheus_lab/my-ec2-key.pub"
+  default = "../../my-ec2-key.pub"
 }
 variable "subnet_ids" {
   type        = list(string)
