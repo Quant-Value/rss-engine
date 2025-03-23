@@ -47,7 +47,7 @@
         chdir: /home/ubuntu
 
     - name: Obtener el ID del contenedor Docker
-      command: "sudo docker ps --filter 'name=my-worker' -q"
+      command: "sudo docker ps --filter 'name=my_worker' -q"
       register: container_id
       changed_when: false
     

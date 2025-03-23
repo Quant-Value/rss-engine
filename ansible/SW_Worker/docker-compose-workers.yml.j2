@@ -5,14 +5,13 @@ services:
     container_name: my_worker
     environment:
       - DOCKER_BUILDKIT=1
-  volumes:
-    - /home/ubuntu/scripts:/app/scripts
-    - /home/ubuntu/.aws:/.aws
-  deploy:
-    resources:
-      limits:
-        cpus: '0.9'
-  restart: unless-stopped  # Para reiniciar el contenedor si falla
-  working_dir: /app  
-  entrypoint: ["./app-bluengo-worker", "worker"]
-  command: -server=http://{{ DNS_SERVER }}:8080 -slots=8
+    volumes:
+      - /home/ubuntu/scripts:/app/scripts
+      - /home/ubuntu/.aws:/.aws
+    deploy:
+      resources:
+        limits:
+          cpus: '0.9'
+    restart: unless-stopped  # Para reiniciar el contenedor si falla
+    working_dir: /app  
+    entrypoint: ["./app-bluengo-worker", "worker"]
