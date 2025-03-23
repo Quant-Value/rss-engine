@@ -6,14 +6,14 @@ services:
     environment:
       - DOCKER_BUILDKIT=1
       #- SERVER=http://i8-dev-rss-engine-demo.campusdual.mkcampus.com:8080  # Puedes reemplazar esta variable en el entorno o definirla fuera del compose
-    volumes:
-      - /home/ubuntu/scripts:/app/scripts
-      - /home/ubuntu/.aws:/.aws
-    deploy:
-      resources:
-        limits:
-          cpus: '0.9'
-    restart: unless-stopped  # Para reiniciar el contenedor si falla
-    working_dir: /app  # Directorio de trabajo del contenedor (similar a `chdir`)
-    entrypoint: ["./app-bluengo-worker", "worker"]
-    command: -server=http://i8-dev-rss-engine-demo.campusdual.mkcampus.com:8080 -slots=8
+  volumes:
+    - /home/ubuntu/scripts:/app/scripts
+    - /home/ubuntu/.aws:/.aws
+  deploy:
+    resources:
+      limits:
+        cpus: '0.9'
+  restart: unless-stopped  # Para reiniciar el contenedor si falla
+  working_dir: /app  # Directorio de trabajo del contenedor (similar a `chdir`)
+  entrypoint: ["./app-bluengo-worker", "worker"]
+  command: -server=http://i8-dev-rss-engine-demo.campusdual.mkcampus.com:8080 -slots=8
