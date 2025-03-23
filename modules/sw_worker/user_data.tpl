@@ -203,10 +203,6 @@ dns_name="${record_name}"
 port=22
 wait_for_dns_resolution "$dns_name" "$port"
 
-# Descargar el playbook de Ansible
-# Descargar los tres playbooks desde GitHub
-curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
-curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/set_workers.yml
 
 # Añadir ubuntu a grupo docker y reiniciar servicio docker
 
@@ -223,16 +219,38 @@ done
 echo "${sw_server_dns_name}" > /etc/dns_name
 
 
-sudo docker run --rm \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /home/ubuntu:/home/ubuntu \
-  --network host \
-  --ulimit nofile=65536:65536 \
-  --ulimit nproc=65535 \
-  --ulimit memlock=-1 \
-  --privileged \
-  -e ANSIBLE_HOST_KEY_CHECKING=False \
-  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  demisto/ansible-runner:1.0.0.110653 \
-  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/install2.yml -e server_ip=${sw_server_dns_name} "
+ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
+cat /home/ubuntu/.ssh/id_rsa.pub >> /home/ubuntu/.ssh/authorized_keys
+
+curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible
+
+sudo docker build -t ansible-local -f /home/ubuntu/Dockerfile.ansible  /home/ubuntu
+
+hosts_file="/home/ubuntu/hosts.ini"
+# Generar el archivo hosts.ini
+echo "[webserver]" > $hosts_file
+echo "$private_ip ansible_user=ubuntu" >> $hosts_file
+
+curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.worker.alpine
+curl -o /home/ubuntu/docker-compose.yml.j2 https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/docker-compose.yml.j2
+curl -o /home/ubuntu/install2.yml  https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/set_workers.yml 
+
+
+sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
+--network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e server_ip=$(cat /etc/dns_name)\
+--privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml  "
+
+
+#sudo docker run --rm \
+# -v /var/run/docker.sock:/var/run/docker.sock \
+#  -v /home/ubuntu:/home/ubuntu \
+#  --network host \
+#  --ulimit nofile=65536:65536 \
+#  --ulimit nproc=65535 \
+#  --ulimit memlock=-1 \
+#  --privileged \
+#  -e ANSIBLE_HOST_KEY_CHECKING=False \
+#  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
+#  demisto/ansible-runner:1.0.0.110653 \
+#  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/install2.yml -e server_ip=$(cat /etc/dns_name) "
 

@@ -1,21 +1,17 @@
 ---
 - name: Configuración de Instancia EC2 Worker
-  hosts: localhost
-  connection: local
+  hosts: all
   become: yes
   tasks:
-    - name: Clone repository from GitHub
-      ansible.builtin.git:
-        repo: "https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git"
-        dest: "/tmp/imatia-rss-engine"
-        version: "main"
-        force: yes
+    - name: Instalar cliente svn
+      apt:
+        name: subversion
+        state: present
 
-    - name: Copy scripts folder from repository
-      ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/scripts/cloud/"
-        dest: "/home/ubuntu/scripts/"
-        mode: "0644"
+    - name: Descargar solo la carpeta 'scripts' desde GitHub usando svn
+      command: >
+        svn checkout https://github.com/campusdualdevopsGrupo2/imatia-rss-engine/trunk/scripts/cloud
+        dest=/home/ubuntu/scripts
 
     - name: Aplicar dos2unix a los archivos .sh copiados
       shell: |
@@ -23,31 +19,25 @@
 
     - name: Generate docker-compose.yml from template
       template:
-        src: "/tmp/imatia-rss-engine/ansible/SW_Worker/docker-compose-workers.yml.j2"
+        src: /home/ubuntu/docker-compose.j2.yml
         dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
 
-    - name: Copy dockerfile
-      ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/dockerfiles/Dockerfile.worker.alpine"
-        dest: /home/ubuntu/Dockerfile
-        mode: '0644'
-
-    - name: Copy docker-compose
-      template:
-        src: "/tmp/imatia-rss-engine/ansible/SW_Worker/docker-compose-workers.yml.j2"
-        dest: /home/ubuntu/docker-compose.yml
-        mode: '0644'
-    
     - name: Docker Compose
       command: docker compose up -d 
       args:
         chdir: /home/ubuntu
 
     - name: Obtener el ID del contenedor Docker
-      command: "sudo docker ps -lq"
+      command: "sudo docker ps --filter 'name=my-worker' -q"
       register: container_id
       changed_when: false
+    
+    - name: Verificar si se encontró el contenedor
+      fail:
+        msg: "No se encontró el contenedor 'my-worker'."
+      when: container_id.stdout == ""
+
 
     - name: Establecer permisos para los scripts en el contenedor
       command: "sudo docker exec {{ container_id.stdout }} chmod +x /app/scripts/{{ item }}"
