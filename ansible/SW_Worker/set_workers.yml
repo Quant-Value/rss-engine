@@ -27,6 +27,7 @@
       ansible.builtin.copy:
         src: "/home/ubuntu/imatia-rss-engine/scripts/cloud/"
         dest: "/home/ubuntu/scripts/"
+        remote_src: yes
         mode: '0644'
 
 
@@ -36,14 +37,14 @@
 
     - name: Generate docker-compose.yml from template
       template:
-        src: /ansible/playbooks/docker-compose.j2.yml
-        dest: /ansible/playbooks/docker-compose.yml
+        src: "/ansible/playbooks/docker-compose.yml.j2"
+        dest: "/home/ubuntu/docker-compose.yml"
         mode: '0644'
 
     - name: Docker Compose
       command: docker compose up -d 
       args:
-        chdir: /ansible/playbooks
+        chdir: /home/ubuntu
 
     - name: Obtener el ID del contenedor Docker
       command: "sudo docker ps --filter 'name=my-worker' -q"
