@@ -34,8 +34,8 @@
         mode: '0644'
 
     - name: Copy docker-compose
-      ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/ansible/SW_Worker/docker-compose-workers.yml"
+      template:
+        src: "/tmp/imatia-rss-engine/ansible/SW_Worker/docker-compose-workers.yml.j2"
         dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
     
