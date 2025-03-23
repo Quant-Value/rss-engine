@@ -235,7 +235,7 @@ sudo docker run --rm \
   --privileged \
   -e ANSIBLE_HOST_KEY_CHECKING=False \
   -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-  -e server_ip=${sw_server_dns_name}
+  -e server_ip=${sw_server_dns_name} \
   demisto/ansible-runner:1.0.0.110653 \
   sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/install2.yml"
 
