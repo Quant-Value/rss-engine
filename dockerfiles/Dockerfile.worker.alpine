@@ -1,0 +1,47 @@
+# Fase de construcción
+FROM golang:1.23-alpine AS builder
+
+RUN apk add --no-cache git
+
+# Clona el repositorio de xq y compílalo
+RUN git clone https://github.com/sibprogrammer/xq.git /tmp/xq \
+    && cd /tmp/xq && go build -o /usr/local/bin/xq .
+
+FROM flexvega/simple-worker:1.0.0-alpine AS builder2
+# Usamos Alpine como base
+FROM alpine:latest
+
+# Instalar dependencias necesarias en Alpine
+RUN apk update && apk add --no-cache \
+    bash \
+    curl \
+    jq \
+    python3 \
+    py3-pip \
+    groff \
+    less \
+    unzip \
+    ca-certificates \
+    aws-cli \
+    && update-ca-certificates
+
+# Instalar AWS CLI v2
+#RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+#    unzip awscliv2.zip && \
+#    ./aws/install && \
+#    rm -rf awscliv2.zip aws
+
+# Copiar los binarios desde la fase de construcción
+COPY --from=builder /usr/local/bin/xq /usr/local/bin/xq
+COPY --from=builder2 /app/app-bluengo-worker /app/app-bluengo-worker
+
+WORKDIR /app
+
+# Asegúrate de que el binario sea ejecutable
+RUN chmod +x /app/app-bluengo-worker
+
+# Exponer el puerto que usará la aplicación
+EXPOSE 8080
+
+# Establece el punto de entrada para ejecutar la aplicación Go
+ENTRYPOINT ["./app-bluengo-worker", "worker"]

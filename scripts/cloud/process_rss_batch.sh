@@ -77,6 +77,7 @@ for url in "${URLS[@]}"; do
     successful_urls=$((successful_urls + 1)) # METRICA
     item_count=$(echo "$items_data" | wc -l)
     total_items=$((total_items + item_count))
+    echo "$url procesada correctamente?"
   else
     failed_processing=$((failed_processing + 1)) # METRICA
   fi
