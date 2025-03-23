@@ -29,7 +29,7 @@
 
     - name: Copy dockerfile
       ansible.builtin.copy:
-        src: "/tmp/imatia-rss-engine/ansible/dockerfiles/Dockerfile.worker"
+        src: "/tmp/imatia-rss-engine/dockerfiles/Dockerfile.worker.alpine"
         dest: /home/ubuntu/Dockerfile
         mode: '0644'
 
@@ -39,7 +39,7 @@
         dest: /home/ubuntu/docker-compose.yml
         mode: '0644'
     
-    - name: Inicia Elasticsearch en segundo plano utilizando Docker Compose
+    - name: Docker Compose
       command: docker compose up -d 
       args:
         chdir: /home/ubuntu
