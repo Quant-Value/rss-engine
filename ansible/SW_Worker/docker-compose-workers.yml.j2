@@ -5,7 +5,7 @@ services:
     container_name: my_worker
     environment:
       - DOCKER_BUILDKIT=1
-      #- SERVER=http://i8-dev-rss-engine-demo.campusdual.mkcampus.com:8080  # Puedes reemplazar esta variable en el entorno o definirla fuera del compose
+      #- SERVER=http://{{ server_ip }}:8080  # Puedes reemplazar esta variable en el entorno o definirla fuera del compose
   volumes:
     - /home/ubuntu/scripts:/app/scripts
     - /home/ubuntu/.aws:/.aws
@@ -16,4 +16,4 @@ services:
   restart: unless-stopped  # Para reiniciar el contenedor si falla
   working_dir: /app  # Directorio de trabajo del contenedor (similar a `chdir`)
   entrypoint: ["./app-bluengo-worker", "worker"]
-  command: -server=http://i8-dev-rss-engine-demo.campusdual.mkcampus.com:8080 -slots=8
+  command: -server=http://{{ server_ip }}:8080 -slots=8
