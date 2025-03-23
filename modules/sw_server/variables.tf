@@ -24,9 +24,9 @@ variable "public_key_path" {
   default = "/home/jorge/Documentos/Bootcamp/Grupo/Prometheus_lab/my-ec2-key.pub"
 }
 variable "subnet_ids" {
-  type        = string
+  type        = list(string)
   description = "IDs de las subnets privadas"
-  default = "subnet-0ea0184c208a85591"
+  default = ["subnet-0ea0184c208a85591", "subnet-0f55161504b88d62b", "subnet-0bcc525fc6ecfc2a2"]
 }
 
 variable "vpc_id" {
