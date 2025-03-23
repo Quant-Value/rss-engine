@@ -3,15 +3,32 @@
   hosts: all
   become: yes
   tasks:
-    - name: Instalar cliente svn
+    - name: Instalar Git
       apt:
-        name: subversion
+        name: git
         state: present
 
-    - name: Descargar solo la carpeta 'scripts' desde GitHub usando svn
-      command: >
-        svn checkout https://github.com/campusdualdevopsGrupo2/imatia-rss-engine/trunk/scripts/cloud
-        dest=/home/ubuntu/scripts
+    - name: Descargar solo la carpeta 'scripts' desde GitHub usando git con Sparse Checkout
+      git:
+        repo: https://github.com/campusdualdevopsGrupo2/imatia-rss-engine.git
+        dest: /home/ubuntu/imatia-rss-engine
+        clone: yes
+        update: no
+        version: main
+
+    - name: Habilitar Sparse Checkout
+      shell: |
+        git sparse-checkout init --cone
+        git sparse-checkout set scripts/cloud
+      args:
+        chdir: /home/ubuntu/imatia-rss-engine
+
+    - name: Copiar solo la carpeta 'scripts/cloud' al directorio de destino
+      ansible.builtin.copy:
+        src: "/home/ubuntu/imatia-rss-engine/scripts/cloud/"
+        dest: "/home/ubuntu/scripts/"
+        mode: '0644'
+
 
     - name: Aplicar dos2unix a los archivos .sh copiados
       shell: |
@@ -19,14 +36,14 @@
 
     - name: Generate docker-compose.yml from template
       template:
-        src: /home/ubuntu/docker-compose.j2.yml
-        dest: /home/ubuntu/docker-compose.yml
+        src: /ansible/playbooks/docker-compose.j2.yml
+        dest: /ansible/playbooks/docker-compose.yml
         mode: '0644'
 
     - name: Docker Compose
       command: docker compose up -d 
       args:
-        chdir: /home/ubuntu
+        chdir: /ansible/playbooks
 
     - name: Obtener el ID del contenedor Docker
       command: "sudo docker ps --filter 'name=my-worker' -q"

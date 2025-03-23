@@ -10,7 +10,7 @@ log_message() {
 # Actualizar paquetes e instalar dependencias
 
 sudo apt-get update -y
-sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
+sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt git
 
 # Guardar el ID de la instancia y el DNS en archivos
 echo "${instance_id}" > /etc/rss-engine-name
@@ -65,7 +65,7 @@ aws route53 change-resource-record-sets \
                     }
                   ]
                 }'
-log_message "Instalacion basica terminada"
+log_message "route53 command cli"
               # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
 # Crear un servicio systemd para actualizar el DNS en cada reinicio
@@ -148,7 +148,7 @@ sudo systemctl enable mydockerapp.service
 sudo systemctl enable update-dns.service
 sudo systemctl start update-dns.service
 
-log_message "Instalacion basica terminada"
+log_message "Servicio creado"
 
 # Función para esperar la propagación de los cambios DNS
 
@@ -218,29 +218,29 @@ done
 
 echo "${sw_server_dns_name}" > /etc/dns_name
 
-
+log_message "ssh keys"
 ssh-keygen -t rsa -b 2048 -f /home/ubuntu/.ssh/id_rsa -N ""
 cat /home/ubuntu/.ssh/id_rsa.pub >> /home/ubuntu/.ssh/authorized_keys
 
 curl -o /home/ubuntu/Dockerfile.ansible https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.ansible
-
+log_message "start build ansible"
 sudo docker build -t ansible-local -f /home/ubuntu/Dockerfile.ansible  /home/ubuntu
 
 hosts_file="/home/ubuntu/hosts.ini"
 # Generar el archivo hosts.ini
 echo "[webserver]" > $hosts_file
 echo "$private_ip ansible_user=ubuntu" >> $hosts_file
-
+log_message "curl files from repo"
 curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.worker.alpine
 curl -o /home/ubuntu/docker-compose.yml.j2 https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/docker-compose.yml.j2
 curl -o /home/ubuntu/install2.yml  https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/set_workers.yml 
 
-
+log_message "start playbooks"
 sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
 --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e server_ip=$(cat /etc/dns_name)\
 --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml  "
 
-
+log_message "end"
 #sudo docker run --rm \
 # -v /var/run/docker.sock:/var/run/docker.sock \
 #  -v /home/ubuntu:/home/ubuntu \
