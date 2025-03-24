@@ -72,6 +72,11 @@ resource "aws_iam_role_policy" "ec2_policy_i8" {
         Action   = "ec2:DescribeInstances"
         Effect   = "Allow"
         Resource = "*"
+      },
+      {
+        Action: "secretsmanager:GetSecretValue",
+        Effect: "Allow",
+        Resource: var.aws_secret_arn
       }
     ]
   })

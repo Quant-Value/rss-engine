@@ -225,18 +225,14 @@ docker compose -f /home/ubuntu/docker-compose.yml up -d
 curl -o /home/ubuntu/graber.sh https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/graber_cloud.sh
 chmod +x /home/ubuntu/graber.sh
 
-# Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
-# de forma que se ejecuten de forma secuencial (en cascada).
-#sudo docker run --rm \
-#  -v /var/run/docker.sock:/var/run/docker.sock \
-#  -v /home/ubuntu:/home/ubuntu \
-#  --network host \
-#  --ulimit nofile=65536:65536 \
-#  --ulimit nproc=65535 \
-#  --ulimit memlock=-1 \
-#  --privileged \
-#  -e ANSIBLE_HOST_KEY_CHECKING=False \
-#  -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
-#  demisto/ansible-runner:1.0.0.110653 \
-#  sh -c "ansible-playbook -i 'localhost,' -c local /home/ubuntu/install.yml && ansible-playbook -i 'localhost,' -c local /home/ubuntu/install2.yml"
+# Obtener el valor secreto desde AWS Secrets Manager
+secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text)
+
+# Extraer el campo 'elasticpass' del JSON del secreto
+elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
+
+# Guardar la contraseña en el archivo .env
+echo "ES_PASSWORD=$elasticpass" > .env
+
+
 

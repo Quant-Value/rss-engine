@@ -2,7 +2,7 @@
 SW_SERVER="i8-demo-rss-engine-demo.campusdual.mkcampus.com"
 # URL de S3 del archivo comprimido de forma manual
 bucket_url="s3://commoncrawl/crawl-data/CC-MAIN-2025-05/wat.paths.gz"
-
+source .env
 # Nombre del archivo comprimido (no es necesario almacenar el archivo descomprimido)
 archivo_comprimido="archivo_descargado.gz"
 
@@ -11,7 +11,7 @@ echo "Descargando y procesando el archivo desde S3: $bucket_url..."
 
 
 ES_USERNAME="elastic"
-ES_PASSWORD="vZ6LlXsNIYUJuMw9SlbiTb"
+
 INDEX_NAME="items-prueba"
 
 echo "Verificando si el índice existe..."
