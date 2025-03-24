@@ -1,5 +1,5 @@
 #!/bin/bash
-SW_SERVER="13.36.243.52"
+SW_SERVER="i8-demo-rss-engine-demo.campusdual.mkcampus.com"
 # URL de S3 del archivo comprimido de forma manual
 bucket_url="s3://commoncrawl/crawl-data/CC-MAIN-2025-05/wat.paths.gz"
 

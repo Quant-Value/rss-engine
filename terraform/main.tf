@@ -18,7 +18,7 @@ module "sw_workers" {
   public_key_path=var.public_key_path
   environment=var.environment
   amount= 3
-  depends_on=[module.sw_server]
+  depends_on=[module.sw_server,aws_secretsmanager_secret_version.rss_engine_imatia_version]
 
 }
 
