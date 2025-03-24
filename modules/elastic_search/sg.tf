@@ -1,6 +1,6 @@
 ### 6. Security Groups
 resource "aws_security_group" "elasticsearch" {
-  name        = "demo-es-sg"
+  name        = "demo-es-sg-${var.environment}"
   description = "SG for Elasticsearch"
   vpc_id      = var.vpc_id
 

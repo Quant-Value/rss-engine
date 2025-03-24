@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_role_i8" {
-  name = "ec2-docker-role-i8"
+  name = "ec2-docker-role-i8-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17"
@@ -18,7 +18,7 @@ resource "aws_iam_role" "ec2_role_i8" {
 
 
 resource "aws_iam_role_policy" "ec2_policy_i8" {
-  name   = "ec2-docker-policy-i8"
+  name   = "ec2-docker-policy-i8-${var.environment}"
   role   = aws_iam_role.ec2_role_i8.id
   policy = jsonencode({
     Version   = "2012-10-17"
@@ -78,6 +78,6 @@ resource "aws_iam_role_policy" "ec2_policy_i8" {
 }
 
 resource "aws_iam_instance_profile" "ec2_role_i8" {
-  name = "ec2-docker-instance-profile-i8"
+  name = "ec2-docker-instance-profile-i8-${var.environment}"
   role = aws_iam_role.ec2_role_i8.name
 }

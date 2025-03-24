@@ -1,5 +1,5 @@
 resource "aws_security_group" "sg_server" {
-  name        = "ec2-security-group-i8"
+  name        = "ec2-security-group-i8-${var.environment}"
   description = "Allow SSH and Docker access"
   vpc_id=var.vpc_id
   ingress {

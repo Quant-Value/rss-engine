@@ -6,7 +6,7 @@ resource "aws_efs_file_system" "this" {
 
   tags = {
     Grupo="g2",
-    Name="efs-demo"
+    Name="efs-${var.environment}"
   }
 
   lifecycle {

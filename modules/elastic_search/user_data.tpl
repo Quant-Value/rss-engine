@@ -15,6 +15,7 @@ sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
 echo "${instance_id}" > /etc/rss-engine-name
 echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
 echo "${zone}" > /etc/zone_id
+echo "${efs_id}" > /etc/efs_id
 
 # Instalar Docker
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
@@ -124,10 +125,10 @@ log_message "Servicio route53"
 
 # Montar EFS
 sudo mkdir -p /mnt/efs
-sudo mount -t nfs4 fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs
+sudo mount -t nfs4 $(cat /etc/efs_id):/ /mnt/efs
 
 # Configurar el montaje persistente en fstab para reinicios
-echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 0 0' | sudo tee -a /etc/fstab
+echo "$(cat /etc/efs_id):/ /mnt/efs nfs4 defaults 0 0" | sudo tee -a /etc/fstab
 
 # Establecer los permisos correctos en el EFS
 sudo chown -R 1000:1000 /mnt/efs/

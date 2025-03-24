@@ -1,6 +1,6 @@
 
 resource "aws_key_pair" "key" {
-  key_name   = "i5-key-g2"
+  key_name   = "i5-key-g2-${var.environment}"
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
 }
 
@@ -19,7 +19,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   disable_api_stop = false
 
   tags = {
-    Name  = "i${count.index + 5} SW worker Grupo2"
+    Name  = "i${count.index + 5} SW worker Grupo2 ${var.environment}"
     Grupo = "g2"
     DNS_NAME="i${count.index + 5}-rss-engine-demo"
   }

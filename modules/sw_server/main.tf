@@ -1,6 +1,6 @@
 
 resource "aws_key_pair" "key_pair" {
-  key_name   = "i8-key-g2"
+  key_name   = "i8-key-g2-${var.environment}"
   public_key = file(var.public_key_path)
 }
 
@@ -13,7 +13,7 @@ resource "aws_instance" "ec2_instance_i8" {
   disable_api_stop = false
 
   tags = {
-    Name = "i8 SW server Grupo2",
+    Name = "i8 SW server Grupo2-${var.environment}",
     Grupo= "g2",
     DNS_NAME="i8-rss-engine-demo"
 

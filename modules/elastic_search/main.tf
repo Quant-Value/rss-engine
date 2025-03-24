@@ -1,7 +1,7 @@
 
 
 resource "aws_key_pair" "key" {
-  key_name   = "my-key-ES"
+  key_name   = "my-key-ES-${var.environment}"
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
 }
 
@@ -25,7 +25,7 @@ resource "aws_instance" "elasticsearch_nodes" {
   }
 
   tags = {
-    Name = "Grupo2-elastic-instance-es-${count.index + 1}",
+    Name = "Grupo2-elastic-instance-es-${count.index + 1}-${var.environment}",
     Grupo="g2",
     DNS_NAME="i${count.index}-rss-engine-demo"
   }
