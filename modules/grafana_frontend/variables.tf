@@ -7,19 +7,16 @@ variable "public_key_path" {
 variable "ami_id" {
   description = "The AMI ID to use for the EC2 instance"
   type        = string
-  default = "ami-06e02ae7bdac6b938"
 }
 
 variable "subnet_ids" {
-  type        = string
+  type        = list(string)
   description = "IDs de las subnets privadas"
-  default = "subnet-0ea0184c208a85591"
 }
 
 variable "vpc_id" {
   type        = string
   description = "ID de la VPC"
-  default = "vpc-01c097d1d9b73fc50"
 }
 
 # variable "environment_id" {
@@ -29,5 +26,29 @@ variable "vpc_id" {
 
 variable "hosted_zone" {
   type = string
-  default = "Z06113313M7JJFJ9M7HM8"
+}
+
+variable "num_availability_zones" {
+  type        = number
+
+}
+
+variable "hosted_zone_arn" {
+  type        = string
+  description = "route53 hostez zone arn"
+
+}
+variable "hosted_zone_id" {
+  type        = string
+  description = "route53 hostez zone arn"
+
+}
+variable "amount"{
+  type=number
+  default=3
+}
+
+variable "environment" {
+  type        = string
+  description = "Ambiente (dev/prod)"
 }

@@ -88,3 +88,19 @@ module "prometheus" {
   depends_on=[module.sw_workers]
 }
 
+module "grafana" {
+  source = "../modules/grafana_frontend"
+  
+  vpc_id = var.vpc_id
+  public_key_path= var.public_key_path
+
+  amount= 3
+
+  ami_id = data.aws_ami.ubuntu_latest.id
+  subnet_ids = data.aws_subnets.public_subnets.ids
+  hosted_zone = data.aws_route53_zone.my_hosted_zone.id
+  num_availability_zones = local.num_availability_zones
+  hosted_zone_arn = data.aws_route53_zone.my_hosted_zone.arn
+  hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
+  environment = var.environment
+}

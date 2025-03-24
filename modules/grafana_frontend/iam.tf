@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_role_i4" {
-  name = "ec2-docker-role-i4"
+  name = "ec2-docker-role-i4-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17"
@@ -16,7 +16,7 @@ resource "aws_iam_role" "ec2_role_i4" {
 }
 
 resource "aws_iam_role_policy" "ec2_policy_i4" {
-  name   = "ec2-docker-policy-i4"
+  name   = "ec2-docker-policy-i4-${var.environment}"
   role   = aws_iam_role.ec2_role_i4.id
   policy = jsonencode({
     Version   = "2012-10-17"
@@ -54,13 +54,13 @@ resource "aws_iam_role_policy" "ec2_policy_i4" {
         Action   = "route53:ChangeResourceRecordSets"
         Effect   = "Allow"
         # Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
-        Resource = data.aws_route53_zone.my_hosted_zone.arn
+        Resource = var.hosted_zone_arn
       },
       {
         Action   = "route53:ListResourceRecordSets"
         Effect   = "Allow"
         # Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
-        Resource = data.aws_route53_zone.my_hosted_zone.arn
+        Resource = var.hosted_zone_arn
       },
       # Add DescribeInstances permission
       {
@@ -73,6 +73,6 @@ resource "aws_iam_role_policy" "ec2_policy_i4" {
 }
 
 resource "aws_iam_instance_profile" "ec2_role_i4" {
-  name = "ec2-docker-instance-profile-i4"
+  name = "ec2-docker-instance-profile-i4-${var.environment}"
   role = aws_iam_role.ec2_role_i4.name
 }
