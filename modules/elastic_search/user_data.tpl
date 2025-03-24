@@ -15,7 +15,7 @@ sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
 echo "${instance_id}" > /etc/rss-engine-name
 echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
 echo "${zone}" > /etc/zone_id
-echo "${efs_id}.efs.eu-west-3.amazonaws.com" > /etc/efs_id
+echo "${efs_id}" > /etc/efs_id
 
 # Instalar Docker
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common

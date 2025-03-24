@@ -62,7 +62,7 @@ module "elastic" {
   ami_id=data.aws_ami.ubuntu_latest.id
   subnet_ids=data.aws_subnets.public_subnets.ids
 
-  efs_id=aws_efs_file_system.this.id
+  efs_id=aws_efs_file_system.this.dns_name
   sg_default_id=data.aws_security_group.default.id
   sg_grafana=module.grafana.sg_id
   sg_otel=module.prometheus.i3_sg_id
