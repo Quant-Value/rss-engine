@@ -43,11 +43,7 @@ data "aws_ami" "ubuntu_latest" {
   }
 }
 
-data "aws_efs_file_system" "elastic_search_efs" {
-  tags = {
-    Name = "Elastic search"
-  }
-}
+
 
 data "aws_subnets" "public_subnets" {
   filter {

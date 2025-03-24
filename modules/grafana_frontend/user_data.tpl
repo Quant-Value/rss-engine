@@ -13,6 +13,8 @@ echo -n "${inumber}" > /etc/rss-engine-name
 echo -n "${suffix_name}.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
 
 efs_dns_name=${efs_dns_name}
+
+
 # Montar EFS
 sudo mkdir -p /mnt/efs
 sudo mount -t nfs4 $efs_dns_name:/ /mnt/efs
