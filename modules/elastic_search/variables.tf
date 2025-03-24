@@ -78,3 +78,10 @@ variable "efs_id"{
 variable "sg_default_id"{
   type=string
 }
+
+variable "sg_grafana"{
+    type= string
+}
+variable "sg_otel"{
+    type= string
+}

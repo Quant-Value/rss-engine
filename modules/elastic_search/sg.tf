@@ -14,7 +14,7 @@ resource "aws_security_group" "elasticsearch" {
     from_port   = 9200
     to_port     = 9200
     protocol    = "tcp"
-    security_groups = [var.sg_sw_worker]
+    security_groups = [var.sg_sw_worker,var.sg_grafana,var.sg_otel]
   }
   
 
