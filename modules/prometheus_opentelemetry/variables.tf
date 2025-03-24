@@ -86,7 +86,24 @@ variable "instance_index" {
 variable "hosted_zone_id" {
   description = "Hosted Zone ID de Route53 donde se actualizarán los registros DNS"
   type        = string
-  default     = "Z06113313M7JJFJ9M7HM8"
+ # default     = "Z06113313M7JJFJ9M7HM8"
 }
 
+variable "hosted_zone_arn" {
+  description = "Hosted Zone ID de Route53 donde se actualizarán los registros DNS"
+  type        = string
+ # default     = "Z06113313M7JJFJ9M7HM8"
+}
+
+variable "efs_id"{
+  type=string
+}
+
+variable "sg_default_id"{
+  type=string
+}
+
+variable "sg_wk" {
+  type = string
+}
  

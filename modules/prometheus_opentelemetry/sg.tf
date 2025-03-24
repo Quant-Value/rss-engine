@@ -33,6 +33,13 @@ resource "aws_security_group" "prometheus" {
 
   }
 
+   ingress {
+    from_port   = 4318
+    to_port     = 4318
+    protocol    = "tcp"
+    security_groups = [var.sg_wk]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

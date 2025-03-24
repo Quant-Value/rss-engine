@@ -1,25 +1,22 @@
-provider "aws" {
-  region = var.aws_region  # o la región correspondiente
-}
-
 resource "aws_key_pair" "key" {
-  key_name   = "i3-key-g2"
+  key_name   = "my-key-i3-${var.environment}"
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
 }
+
 
 resource "aws_instance" "ec2_node" {
   count           = var.instance_count
   #ami             = "ami-091f18e98bc129c4e" # Ubuntu 24 ami londres
-  ami             = data.aws_ami.ubuntu_latest.id
+  ami             = var.ami_id
   instance_type   = "t3.medium"
-  subnet_id       = data.aws_subnets.private_subnets.ids[0]
+  subnet_id       = var.subnet_ids
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
   
   # Asignar un rol a la instancia para acceder a ECR
   iam_instance_profile = aws_iam_instance_profile.ec2_role_i3.name
   # Seguridad
-  vpc_security_group_ids = [aws_security_group.prometheus.id,data.aws_security_group.default.id]
+  vpc_security_group_ids = [aws_security_group.prometheus.id,var.sg_default_id]
   root_block_device {
     volume_size = 30  # Tamaño en GB del volumen raíz (aumentado a 50 GB en este ejemplo)
     volume_type = "gp2"  # Tipo de volumen (general purpose SSD)
@@ -27,7 +24,7 @@ resource "aws_instance" "ec2_node" {
   }
 
   tags = {
-    Name = "Grupo2-prometheus-opentelemetry-i3-es-${count.index + 1}",
+    Name = "Grupo2-prometheus-opentelemetry-i3-es-${count.index + 1}-${var.environment}",
     Grupo="g2",
     DNS_NAME="i3-rss-engine-demo"
   }
@@ -35,7 +32,7 @@ resource "aws_instance" "ec2_node" {
   user_data = templatefile("${path.module}/user_data.tpl", {
     instance_id = "i3-${var.environment}"
     record_name = "i3-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
-    zone=data.aws_route53_zone.my_hosted_zone.id
-    efs_dns_name=data.aws_efs_file_system.elastic_search_efs.dns_name
+    zone=var.hosted_zone_id
+    efs_dns_name=var.efs_id
   })
 }
