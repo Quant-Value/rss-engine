@@ -45,9 +45,6 @@ sudo systemctl enable docker
 # Verificar Docker
 sudo docker --version
 
-# Install Docker Compose
-sudo apt-get install -y docker-compose
-
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
