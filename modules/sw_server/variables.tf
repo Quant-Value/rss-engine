@@ -57,4 +57,3 @@ variable "aws_secret_arn" {
   description = "arn from secret"
 
 }
-
