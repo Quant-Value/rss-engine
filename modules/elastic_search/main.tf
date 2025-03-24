@@ -5,17 +5,7 @@ resource "aws_key_pair" "key" {
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
 }
 
-data "aws_security_group" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
 
-  filter {
-    name   = "group-name"
-    values = ["default"]
-  }
-}
 
 resource "aws_instance" "elasticsearch_nodes" {
   count           = var.amount  # Número de instancias EC2 que deseas lanzar

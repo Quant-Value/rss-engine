@@ -36,12 +36,7 @@ variable "ami_id" {
   default     = "ami-06e02ae7bdac6b938"  # Reemplaza con el ID de tu AMI
 }
 
-# Subredes disponibles para las instancias EC2
-variable "subnet_ids" {
-  description = "Lista de IDs de subredes disponibles"
-  type        = list(string)
-  #default     = ["subnet-03212edf6d0f0c101", "subnet-00ba1197ad5eb3854", "subnet-0d5acc6337a4f307d"]  # Reemplaza con los IDs de tus subredes
-}
+
 variable "environment"{
     type= string
     #default= "demo"

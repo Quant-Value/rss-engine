@@ -41,3 +41,21 @@ variable "subnet_ids" {
   description = "IDs de las subnets privadas"
 
 }
+
+variable "hosted_zone_arn" {
+  type        = string
+  description = "route53 hostez zone arn"
+
+}
+variable "hosted_zone_id" {
+  type        = string
+  description = "route53 hostez zone arn"
+
+}
+variable "aws_secret_arn" {
+  type        = string
+  description = "arn from secret"
+
+}
+
+

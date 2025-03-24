@@ -20,7 +20,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   count           = var.amount
   ami             = var.ami_id
   instance_type   = "t2.micro"
-  subnet_id       = data.aws_subnets.public_subnets.ids[((random_integer.example.result+count.index)%local.num_availability_zones)]
+  subnet_id       = var.subnets.ids[((random_integer.example.result+count.index)%var.num_availability_zones)]
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
 
@@ -37,7 +37,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   user_data = templatefile("${path.module}/user_data.tpl", {
     instance_id = "i${count.index + 5}-${var.environment}"
     record_name = "i${count.index + 5}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
-    zone=data.aws_route53_zone.my_hosted_zone.id
+    zone=var.hosted_zone_id
     sw_server_dns_name=var.dns_name_server #cambiar esto por un output
   })
 

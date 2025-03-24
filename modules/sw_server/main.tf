@@ -1,8 +1,4 @@
-/*
-provider "aws" {
-  region = "eu-west-3"
-}
-*/
+
 resource "aws_key_pair" "key_pair" {
   key_name   = "i8-key-g2"
   public_key = file(var.public_key_path)
@@ -13,7 +9,7 @@ resource "aws_instance" "ec2_instance_i8" {
   ami           = var.ami_id
   instance_type = "t3.medium"
   key_name      = aws_key_pair.key_pair.key_name
-  subnet_id       = data.aws_subnets.public_subnets.ids[0]
+  subnet_id       = var.subnet_ids[0]
   disable_api_stop = false
 
   tags = {
@@ -34,7 +30,7 @@ resource "aws_instance" "ec2_instance_i8" {
     user_data = templatefile("${path.module}/user_data.tpl", {
     instance_id = "i8-${var.environment}"
     record_name = "i8-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
-    zone=data.aws_route53_zone.my_hosted_zone.id
+    zone=var.hosted_zone_id
   })
 
   depends_on = [aws_security_group.sg_server]
