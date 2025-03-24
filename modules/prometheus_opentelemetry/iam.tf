@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ec2_role_i3" {
-  name = "ec2-docker-role-i3"
+  name = "ec2-docker-role-i3-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17"
@@ -19,7 +19,7 @@ resource "aws_iam_role" "ec2_role_i3" {
 
 
 resource "aws_iam_role_policy" "ec2_policy_i3" {
-  name   = "ec2-docker-policy-i3"
+  name   = "ec2-docker-policy-i3-${var.environment}"
   role   = aws_iam_role.ec2_role_i3.id
   policy = jsonencode({
     Version   = "2012-10-17"
@@ -56,18 +56,18 @@ resource "aws_iam_role_policy" "ec2_policy_i3" {
       {
         Action   = "route53:ChangeResourceRecordSets"
         Effect   = "Allow"
-        Resource = data.aws_route53_zone.my_hosted_zone.arn
+        Resource = var.hosted_zone_arn
       },
       {
         Action   = "route53:ListResourceRecordSets"
         Effect   = "Allow"
-        Resource = data.aws_route53_zone.my_hosted_zone.arn
+        Resource = var.hosted_zone_arn
       }
     ]
   })
 }
 
 resource "aws_iam_instance_profile" "ec2_role_i3" {
-  name = "ec2-docker-instance-profile-i3"
+  name = "ec2-docker-instance-profile-i3-${var.environment}"
   role = aws_iam_role.ec2_role_i3.name
 }

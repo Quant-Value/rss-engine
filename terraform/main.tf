@@ -70,6 +70,22 @@ module "elastic" {
 
 }
 
+module "prometheus" {
+  source = "../modules/prometheus_opentelemetry"
+  vpc_id=var.vpc_id
+  private_key_path=var.private_key_path
+  public_key_path=var.public_key_path
+  environment=var.environment
+  sg_wk=module.sw_server.sg_id_server #same sg as workers
+  hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
+  hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
+  ami_id=data.aws_ami.ubuntu_latest.id
+  subnet_ids=data.aws_subnets.public_subnets.ids
+  efs_id=aws_efs_file_system.this.id
+  sg_default_id=data.aws_security_group.default.id
+  depends_on=[module.sw_workers]
+}
+
 module "grafana" {
   source = "../modules/grafana_frontend"
   
