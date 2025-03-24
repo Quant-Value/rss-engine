@@ -68,7 +68,7 @@ module "elastic" {
   sg_otel=module.prometheus.i3_sg_id
 
   
-  depends_on=[module.sw_workers,module.prometheus]
+  depends_on=[module.sw_workers,module.prometheus,module.grafana,aws_efs_mount_target.this]
 
 }
 
@@ -85,7 +85,7 @@ module "prometheus" {
   subnet_ids=data.aws_subnets.public_subnets.ids
   efs_id=aws_efs_file_system.this.id
   sg_default_id=data.aws_security_group.default.id
-  depends_on=[module.sw_workers]
+  depends_on=[module.sw_workers,aws_efs_mount_target.this]
 }
 
 module "grafana" {
@@ -104,4 +104,5 @@ module "grafana" {
   hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
   environment = var.environment
   aws_secret_arn = data.aws_secretsmanager_secret.my_secret.arn
+  depends_on=[aws_efs_mount_target.this]
 }
