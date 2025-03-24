@@ -64,7 +64,7 @@ module "elastic" {
 
   efs_id=aws_efs_file_system.this.id
   sg_default_id=data.aws_security_group.default.id
-  sg_grafana=""
+  sg_grafana=module.grafana.sg_id
   sg_otel=module.prometheus.i3_sg_id
 
   
