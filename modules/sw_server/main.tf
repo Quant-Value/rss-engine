@@ -24,7 +24,7 @@ resource "aws_instance" "ec2_instance_i8" {
   }
 
   # Crear un grupo de seguridad para permitir el acceso SSH
-  vpc_security_group_ids = [aws_security_group.sg.id]
+  vpc_security_group_ids = [aws_security_group.sg_server.id]
 
   associate_public_ip_address = true
 
@@ -37,7 +37,7 @@ resource "aws_instance" "ec2_instance_i8" {
     zone=data.aws_route53_zone.my_hosted_zone.id
   })
 
-  depends_on = [aws_security_group.sg]
+  depends_on = [aws_security_group.sg_server]
 }
 locals {
   record_name = "i8-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 

@@ -1,4 +1,4 @@
-resource "aws_security_group" "sg_wk" {
+/*resource "aws_security_group" "sg_wk" {
   name        = "ec2-security-group-i5"
   description = "Allow SSH and Docker access"
   vpc_id=var.vpc_id
@@ -26,3 +26,4 @@ resource "aws_security_group" "sg_wk" {
     Grupo="g2"
   }
 }
+*/

@@ -42,7 +42,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   })
 
   # Aquí no necesitamos provisioner "remote-exec", sino que usaremos Ansible
-  depends_on = [ aws_security_group.sg_wk ]
+  depends_on = [ var.sg_group_server]
 
 }
 
