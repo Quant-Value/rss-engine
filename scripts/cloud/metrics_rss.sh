@@ -1,6 +1,6 @@
 #!/bin/bash
 METRICS_URL="https://i3-dev-rss-engine-demo.campusdual.mkcampus.com:4318/v1/metrics"
-set -x
+#set -x
 
 # Asegurarse de que se pase el JSON como argumento
 if [ $# -eq 0 ]; then
