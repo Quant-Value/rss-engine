@@ -58,8 +58,3 @@ variable "aws_secret_arn" {
 
 }
 
-variable "aws_secret_arn" {
-  type        = string
-  description = "arn from secret"
-
-}

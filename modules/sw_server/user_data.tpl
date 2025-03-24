@@ -204,9 +204,7 @@ port=22
 wait_for_dns_resolution "$dns_name" "$port"
 
 # Descargar el playbook de Ansible
-# Descargar los tres playbooks desde GitHub
-#curl -o /home/ubuntu/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
-#curl -o /home/ubuntu/install2.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Server/set_server.yml
+
 curl -o /home/ubuntu/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Server/docker-compose-server.yml
 # Añadir ubuntu a grupo docker y reiniciar servicio docker
 
@@ -223,7 +221,8 @@ done
 docker compose -f /home/ubuntu/docker-compose.yml up -d
 
 curl -o /home/ubuntu/graber.sh https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/graber_cloud.sh
-chmod +x /home/ubuntu/graber.sh
+curl -o /home/ubuntu/app https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/app
+chmod +x /home/ubuntu/graber.sh /home/ubuntu/app
 
 # Obtener el valor secreto desde AWS Secrets Manager
 secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text)

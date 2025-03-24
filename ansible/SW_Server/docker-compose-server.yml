@@ -13,7 +13,7 @@ services:
           memory: 3.8G                # Limitar la RAM
     entrypoint: ["./app-bluengo-worker", "server"]
   
-    myserver_add:
+  myserver_add:
     image: "flexvega/simple-worker:1.0.0-alpine"  # Imagen del contenedor
     container_name: "myserver_add"                # Nombre del contenedor (diferente)
     network_mode: host                            # Usar la red del host
