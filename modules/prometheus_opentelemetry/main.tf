@@ -6,35 +6,13 @@ resource "aws_key_pair" "key" {
   key_name   = "i3-key-g2"
   public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
 }
-data "aws_security_group" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-
-  filter {
-    name   = "group-name"
-    values = ["default"]
-  }
-}
-
-data "aws_vpc" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-}
-
-data "aws_route53_zone" "my_hosted_zone" {
-  name = "campusdual.mkcampus.com"  # Cambia este nombre por el nombre del dominio
-}
 
 resource "aws_instance" "ec2_node" {
   count           = var.instance_count
   #ami             = "ami-091f18e98bc129c4e" # Ubuntu 24 ami londres
-  ami             = var.ami_id
-  instance_type   = "t3.large"
-  subnet_id       = var.subnet_ids
+  ami             = data.aws_ami.ubuntu_latest.id
+  instance_type   = "t3.medium"
+  subnet_id       = data.aws_subnets.public_subnets.ids[0]
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
   
@@ -58,5 +36,6 @@ resource "aws_instance" "ec2_node" {
     instance_id = "i3-${var.environment}"
     record_name = "i3-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
     zone=data.aws_route53_zone.my_hosted_zone.id
+    efs_dns_name=data.aws_efs_file_system.elastic_search_efs.dns_name
   })
 }
