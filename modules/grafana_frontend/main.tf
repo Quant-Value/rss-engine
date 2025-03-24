@@ -7,6 +7,10 @@ resource "aws_key_pair" "key" {
   public_key = file(var.public_key_path)
 }
 
+data "aws_route53_zone" "my_hosted_zone" {
+  name = "campusdual.mkcampus.com"  # Nombre del dominio
+}
+
 resource "aws_instance" "public_ec2" {
   ami           = var.ami_id
   instance_type = "t3.medium"
@@ -29,7 +33,7 @@ resource "aws_instance" "public_ec2" {
   user_data = templatefile("${path.module}/user_data.tpl", {
     inumber = "i4"
     suffix_name = "-rss-engine-demo"
-    zone = "Z06113313M7JJFJ9M7HM8"
+    zone = data.aws_route53_zone.my_hosted_zone.id
   })
 
   depends_on = [aws_security_group.sg]
