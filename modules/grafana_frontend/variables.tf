@@ -47,3 +47,8 @@ variable "amount"{
   type=number
   default=3
 }
+
+variable "environment" {
+  type        = string
+  description = "Ambiente (dev/prod)"
+}

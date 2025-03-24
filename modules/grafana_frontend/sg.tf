@@ -1,5 +1,5 @@
 resource "aws_security_group" "sg" {
-  name        = "i4-ec2-security-group"
+  name        = "i4-ec2-security-group-${var.environment}"
   description = "Allow SSH and Docker access"
   vpc_id=var.vpc_id
   ingress {
@@ -33,7 +33,7 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "i4-ec2-sg",
+    Name = "i4-ec2-sg-${var.environment}",
     Grupo="g2"
   }
 }

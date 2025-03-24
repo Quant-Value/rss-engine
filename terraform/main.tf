@@ -100,5 +100,5 @@ module "grafana" {
   num_availability_zones = local.num_availability_zones
   hosted_zone_arn = data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
-  suffix_name = 
+  environment = var.environment
 }
