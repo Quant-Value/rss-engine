@@ -46,6 +46,7 @@ sudo systemctl enable docker
 sudo docker --version
 
 
+
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks
 curl -o /home/ubuntu/playbooks/install.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/install.yml
@@ -149,7 +150,7 @@ elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 # Path to the custom.ini file
 config_file="/home/ubuntu/conf/custom.ini"
 # Create or overwrite the custom.ini file with the admin password value
-echo -e "[security]\n\nadmin_user = grafana\nadmin_password = $elasticpass" > "$config_file"
+echo -e "[security]\n\nadmin_user = admin\nadmin_password = $elasticpass" > "$config_file"
 
 # Confirm the update
 echo "Password saved to $config_file"
