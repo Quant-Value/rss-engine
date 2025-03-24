@@ -2,7 +2,7 @@
 #set -x
 
 ES_USERNAME="elastic"
-
+AWS_ELASTICSEARCH_ALB_DNS="i0-demo-rss-engine-demo.campusdual.mkcampus.com"
 source .env
 #source .env
 INDEX_DEST="feed_items_demo"

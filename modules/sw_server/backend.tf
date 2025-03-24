@@ -1,3 +1,4 @@
+ /*
  terraform {
    backend "s3" {
      bucket  = "proyecto-devops-grupo-dos-paris"         # Nombre de tu bucket S3
@@ -6,3 +7,4 @@
      encrypt = true
    }
  }
+*/

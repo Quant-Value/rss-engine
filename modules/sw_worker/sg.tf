@@ -1,4 +1,4 @@
-resource "aws_security_group" "sg" {
+resource "aws_security_group" "sg_wk" {
   name        = "ec2-security-group-i5"
   description = "Allow SSH and Docker access"
   vpc_id=var.vpc_id
@@ -8,12 +8,7 @@ resource "aws_security_group" "sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
     ingress {
     from_port   = -1
     to_port     = -1

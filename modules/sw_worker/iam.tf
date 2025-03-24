@@ -15,13 +15,6 @@ resource "aws_iam_role" "ec2_role_i5" {
   })
 }
 
-data "aws_route53_zone" "my_hosted_zone" {
-  name = "campusdual.mkcampus.com"  # Cambia este nombre por el nombre del dominio
-}
-data "aws_secretsmanager_secret" "my_secret" {
-  name = "rss-engine-imatia"  # Cambia este nombre por el nombre de tu secreto
-}
-
 
 resource "aws_iam_role_policy" "ec2_policy_i5" {
   name   = "ec2-docker-policy-i5"

@@ -34,6 +34,23 @@
     - name: Aplicar dos2unix a los archivos .sh copiados
       shell: |
         dos2unix /home/ubuntu/scripts/*.sh
+        
+    - name: Retrieve secret from AWS Secrets Manager
+      command: >
+        aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text
+      register: secret_value
+
+    - name: Set the password as a variable
+      set_fact:
+        elasticpass: "{{ secret_value.stdout | from_json | json_query('elasticpass') }}"
+
+    - name: Write the secret to a .env file
+      copy:
+        dest: /home/ubuntu/scripts/.env
+        content: |
+          ES_PASSWORD={{ elasticpass }}
+        mode: '0600'
+
 
     - name: Generate docker-compose.yml from template
       template:
