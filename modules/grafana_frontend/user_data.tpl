@@ -58,8 +58,8 @@ curl -o /home/ubuntu/playbooks/install2.yml https://raw.githubusercontent.com/ca
 sudo usermod -aG docker ubuntu
 sudo systemctl restart docker
 
-
-instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:Name,Values=I4_instance" --query "Reservations[0].Instances[0].InstanceId" --output text)
+private_ip=$(hostname -I | awk '{print $1}')
+instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=private-ip-address,Values=$private_ip" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
 PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 
