@@ -12,7 +12,7 @@ resource "aws_instance" "ec2_node" {
   #ami             = "ami-091f18e98bc129c4e" # Ubuntu 24 ami londres
   ami             = data.aws_ami.ubuntu_latest.id
   instance_type   = "t3.medium"
-  subnet_id       = data.aws_subnets.public_subnets.ids[0]
+  subnet_id       = data.aws_subnets.private_subnets.ids[0]
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
   
