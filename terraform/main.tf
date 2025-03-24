@@ -68,7 +68,7 @@ module "elastic" {
   sg_otel=module.prometheus.i3_sg_id
 
   
-  depends_on=[module.sw_workers,module.prometheus]
+  depends_on=[module.sw_workers,module.prometheus,module.grafana,aws_efs_mount_target.this]
 
 }
 

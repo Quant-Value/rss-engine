@@ -222,6 +222,9 @@ done
 
 docker compose -f /home/ubuntu/docker-compose.yml up -d
 
+curl -o /home/ubuntu/graber.sh https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/graber_cloud.sh
+chmod +x /home/ubuntu/graber.sh
+
 # Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
 # de forma que se ejecuten de forma secuencial (en cascada).
 #sudo docker run --rm \

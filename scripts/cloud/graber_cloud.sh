@@ -11,7 +11,7 @@ echo "Descargando y procesando el archivo desde S3: $bucket_url..."
 
 
 ES_USERNAME="elastic"
-ES_PASSWORD="Zc1gQ1dxNJ3fAFgrBcbxLu"
+ES_PASSWORD="vZ6LlXsNIYUJuMw9SlbiTb"
 INDEX_NAME="items-prueba"
 
 echo "Verificando si el índice existe..."
