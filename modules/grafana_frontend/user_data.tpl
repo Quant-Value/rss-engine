@@ -41,9 +41,11 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 # Iniciar Docker
 sudo systemctl start docker
 sudo systemctl enable docker
+sudo systemctl start docker.socket
 
 # Verificar Docker
 sudo docker --version
+
 
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
@@ -149,7 +151,7 @@ elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 # Path to the custom.ini file
 config_file="/home/ubuntu/conf/custom.ini"
 # Create or overwrite the custom.ini file with the admin password value
-echo -e "[security]\n\nadmin_user = grafana\nadmin_password = $elasticpass" > "$config_file"
+echo -e "[security]\n\nadmin_user = admin\nadmin_password = $elasticpass" > "$config_file"
 
 # Confirm the update
 echo "Password saved to $config_file"
