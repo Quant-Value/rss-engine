@@ -143,6 +143,20 @@ sudo systemctl restart docker
 
 curl -o /home/ubuntu/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/docker-compose.yml
 
+mkdir /home/ubuntu/conf
+# Retrieve the secret from AWS Secrets Manager
+secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text)
+# Extract the 'elasticpass' field from the JSON secret
+elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
+# Path to the custom.ini file
+config_file="/home/ubuntu/conf/custom.ini"
+# Create or overwrite the custom.ini file with the admin password value
+echo -e "[security]\n\nadmin_user = grafana\nadmin_password = $elasticpass" > "$config_file"
+
+# Confirm the update
+echo "Password saved to $config_file"
+
+
 docker compose -f /home/ubuntu/docker-compose.yml up -d
 # Run the Docker container with Ansible and execute the playbooks
 #sudo docker run --rm \

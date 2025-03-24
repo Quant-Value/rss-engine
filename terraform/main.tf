@@ -103,4 +103,5 @@ module "grafana" {
   hosted_zone_arn = data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
   environment = var.environment
+  aws_secret_arn = data.aws_secretsmanager_secret.my_secret.arn
 }

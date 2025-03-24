@@ -52,3 +52,9 @@ variable "environment" {
   type        = string
   description = "Ambiente (dev/prod)"
 }
+
+variable "aws_secret_arn" {
+  type        = string
+  description = "arn from secret"
+
+}
