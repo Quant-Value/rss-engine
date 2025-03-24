@@ -17,7 +17,7 @@ module "sw_workers" {
   private_key_path=var.private_key_path
   public_key_path=var.public_key_path
   environment=var.environment
-  amount= 4
+  amount= 3
   depends_on=[module.sw_server]
 
 }

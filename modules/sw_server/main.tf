@@ -17,7 +17,7 @@ resource "aws_instance" "ec2_instance_i8" {
   disable_api_stop = false
 
   tags = {
-    Name = "i8 simple worker server Grupo2",
+    Name = "i8 SW server Grupo2",
     Grupo= "g2",
     DNS_NAME="i8-rss-engine-demo"
 
