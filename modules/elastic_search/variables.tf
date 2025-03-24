@@ -71,7 +71,7 @@ variable "num_availability_zones" {
 
 }
 
-variable "efs_id"{
+variable "efs_dns_name"{
   type=string
 }
 

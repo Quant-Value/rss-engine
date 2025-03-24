@@ -35,6 +35,6 @@ resource "aws_instance" "elasticsearch_nodes" {
     cantidad    = var.amount  # Pasar la variable cantidad al user_data.tpl
     index = count.index
     zone=var.hosted_zone_id
-    efs_id=var.efs_id
+    efs_dns_name=var.efs_dns_name
   })
 }
