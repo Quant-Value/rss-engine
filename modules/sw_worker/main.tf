@@ -25,7 +25,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   disable_api_stop = false
 
   tags = {
-    Name  = "SW worker i${count.index + 5} Grupo2"
+    Name  = "i${count.index + 5} SW worker Grupo2"
     Grupo = "g2"
     DNS_NAME="i${count.index + 5}-rss-engine-demo"
   }
