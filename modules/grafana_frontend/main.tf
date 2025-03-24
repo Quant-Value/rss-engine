@@ -28,6 +28,7 @@ resource "aws_instance" "public_ec2" {
     inumber = "i4"
     suffix_name = "-rss-engine-demo"
     zone = var.hosted_zone_id
+    efs_dns_name=var.efs_id
   })
 
   depends_on = [aws_security_group.sg]
