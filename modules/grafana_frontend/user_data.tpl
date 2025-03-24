@@ -3,7 +3,7 @@
 set -x
 # Update the system and install necessary dependencies
 apt-get update -y
-apt-get install -y unzip curl nfs-common git sudo docker.io python3-pip
+apt-get install -y unzip curl nfs-common git sudo python3-pip
 
 # Set hostname
 hostnamectl set-hostname "i4-rss-engine-demo.campusdual.mkcampus.com"
@@ -43,12 +43,9 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 # Iniciar Docker
 sudo systemctl start docker
 sudo systemctl enable docker
-sudo systemctl start docker.socket
 
 # Verificar Docker
 sudo docker --version
-
-
 
 # Ensure the playbook and docker-compose.yml file are available before running playbooks
 mkdir -p /home/ubuntu/playbooks

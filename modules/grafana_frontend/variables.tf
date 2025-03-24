@@ -62,3 +62,7 @@ variable "aws_secret_arn" {
 variable "efs_id"{
   type=string
 }
+
+variable "sg_default_id"{
+  type=string
+}

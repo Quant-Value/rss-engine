@@ -20,7 +20,7 @@ resource "aws_instance" "public_ec2" {
   iam_instance_profile = aws_iam_instance_profile.ec2_role_i4.name
 
   # Crear un grupo de seguridad para permitir el acceso SSH
-  vpc_security_group_ids = [aws_security_group.sg.id]
+  vpc_security_group_ids = [aws_security_group.sg.id,var.sg_default_id]
 
   associate_public_ip_address = true
 

@@ -105,5 +105,6 @@ module "grafana" {
   environment = var.environment
   aws_secret_arn = data.aws_secretsmanager_secret.my_secret.arn
   depends_on=[aws_efs_mount_target.this]
+  sg_default_id=data.aws_security_group.default.id
   efs_id=aws_efs_file_system.this.dns_name
 }
