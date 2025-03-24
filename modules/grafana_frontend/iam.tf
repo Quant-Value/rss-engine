@@ -54,13 +54,13 @@ resource "aws_iam_role_policy" "ec2_policy_i4" {
         Action   = "route53:ChangeResourceRecordSets"
         Effect   = "Allow"
         # Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
-        Resource = data.aws_route53_zone.my_hosted_zone.arn
+        Resource = var.hosted_zone_arn
       },
       {
         Action   = "route53:ListResourceRecordSets"
         Effect   = "Allow"
         # Resource = "arn:aws:route53:::hostedzone/Z06113313M7JJFJ9M7HM8"
-        Resource = data.aws_route53_zone.my_hosted_zone.arn
+        Resource = var.hosted_zone_arn
       },
       # Add DescribeInstances permission
       {

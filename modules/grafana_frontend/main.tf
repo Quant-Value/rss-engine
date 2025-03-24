@@ -7,12 +7,14 @@ resource "aws_key_pair" "key" {
   public_key = file(var.public_key_path)
 }
 
+
 resource "aws_instance" "public_ec2" {
+  count           = var.amount
   ami           = var.ami_id
   instance_type = "t3.medium"
   key_name      = aws_key_pair.key.key_name
   # subnet_id       = var.subnet_ids
-  subnet_id       = data.aws_subnets.public_subnets.ids[((random_integer.example.result+count.index)%local.num_availability_zones)]
+  subnet_id       = data.aws_subnets.private_subnets.ids[0]
   disable_api_stop = false
 
   tags = {
@@ -30,7 +32,7 @@ resource "aws_instance" "public_ec2" {
   user_data = templatefile("${path.module}/user_data.tpl", {
     inumber = "i4"
     suffix_name = data.aws_secretsmanager_secret.my_secret
-    zone = data.aws_route53_zone.my_hosted_zone.id
+    zone = var.hosted_zone_id
   })
 
   depends_on = [aws_security_group.sg]
