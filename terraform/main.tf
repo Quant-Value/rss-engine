@@ -60,7 +60,7 @@ module "elastic" {
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
   aws_secret_arn=data.aws_secretsmanager_secret.my_secret.arn
   ami_id=data.aws_ami.ubuntu_latest.id
-  subnet_ids=data.aws_subnets.public_subnets.ids
+  subnet_ids=data.aws_subnets.private_subnets.ids
 
   efs_id=aws_efs_file_system.this.dns_name
   sg_default_id=data.aws_security_group.default.id
