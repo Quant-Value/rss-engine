@@ -1,16 +1,25 @@
 services:
   prometheus:
-    command: ["sh", "-c", "sudo chown -R 1000:1000 /prometheus && mkdir -p /prometheus/data2 && exec prometheus --config.file=/prometheus/config/prometheus.yml --storage.tsdb.path=/prometheus/data2 "]
+    command: ["sh", "-c", "sudo chown -R 1000:1000 /prometheus && mkdir -p /prometheus/data && exec prometheus --config.file=/prometheus/config/prometheus.yml --storage.tsdb.path=/prometheus/data "]
     build: .
     ports:
       - "9090:9090"
     volumes:
-      - "/mnt/efs/prometheus:/prometheus"  # Volumen en EFS para datos de Prometheus
+      - "/home/ubuntu/containers/prometheus:/prometheus"  # Volumen en EFS para datos de Prometheus
     depends_on:
       otel-collector:
         condition: service_started
     restart: unless-stopped
-
+  backup:
+    image: alpine  # Contenedor ligero para hacer backup
+    container_name: prometheus_backup
+    volumes:
+      - /home/ubuntu/containers/prometheus:/data  # Monta los datos de Prometheus
+      - /mnt/efs/prometheus-backup:/backup  # Monta EFS en el host
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "apk add --no-cache rsync && while true; do rsync -av --delete /data /backup; sleep 21600; done"  # Backup cada 6 horas
+    restart: always
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config", "/otel/conf/otel-collector-config.yml"]
@@ -21,4 +30,3 @@ services:
     volumes:
       - "/mnt/efs/otel:/otel"
     restart: unless-stopped
-

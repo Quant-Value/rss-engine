@@ -196,15 +196,16 @@ dns_name="${record_name}"
 port=22
 wait_for_dns_resolution "$dns_name" "$port"
 
-# Descargar el playbook de Ansible
+# Crear directorio para la configuración de prometheus y otel
+mkdir -p /home/ubuntu/containers/prometheus/config
+mkdir -p /mnt/efs/otel
 # Descargar los tres playbooks desde GitHub
 curl -o /mnt/efs/otel/otel-collector-config.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/config/otel-collector-config.yml
-curl -o /mnt/efs/prometheus/config/prometheus.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/config/prometheus.yml
+curl -o /home/ubuntu/containers/prometheus/config/prometheus.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/config/prometheus.yml
 curl -o /home/ubuntu/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/Otel-Prometheus/docker-compose.yml
 curl -o /home/ubuntu/Dockerfile https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/dockerfiles/Dockerfile.prometheus
 
-# Ejecutar los tres playbooks de Ansible dentro de un contenedor Docker,
-# de forma que se ejecuten de forma secuencial (en cascada).
+# Hacer docker compose para lanzar los contenedores
 
 docker compose -f /home/ubuntu/docker-compose.yml up -d
 
