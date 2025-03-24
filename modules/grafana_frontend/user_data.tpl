@@ -41,6 +41,7 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 # Iniciar Docker
 sudo systemctl start docker
 sudo systemctl enable docker
+sudo systemctl start docker.socket
 
 # Verificar Docker
 sudo docker --version
