@@ -12,6 +12,18 @@ hostnamectl set-hostname "i4-rss-engine-demo.campusdual.mkcampus.com"
 echo -n "${inumber}" > /etc/rss-engine-name
 echo -n "${suffix_name}.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
 
+# Montar EFS
+sudo mkdir -p /mnt/efs
+sudo mount -t nfs4 fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs
+
+# Configurar el montaje persistente en fstab para reinicios
+echo 'fs-09f3adbae659e7e88.efs.eu-west-3.amazonaws.com:/ /mnt/efs nfs4 defaults 0 0' | sudo tee -a /etc/fstab
+
+# Establecer los permisos correctos en el EFS
+sudo chown -R 1000:1000 /mnt/efs/
+
+log_message "EFS montado"
+
 # Install AWS CLI
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 unzip awscliv2.zip
