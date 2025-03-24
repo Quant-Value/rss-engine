@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     volumes:
       - "/mnt/efs/grafana:/grafana"
+      - "/home/ubuntu/conf:/config"
       # - "/home/ubuntu/grafana:/grafana"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
