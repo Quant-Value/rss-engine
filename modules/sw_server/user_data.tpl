@@ -231,7 +231,10 @@ secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imati
 elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 
 # Guardar la contraseña en el archivo .env
-echo "ES_PASSWORD=$elasticpass" > .env
+echo "ES_PASSWORD=$elasticpass" > /home/ubuntu/.env
+
+sleep(600)
+./graber.sh
 
 
 
