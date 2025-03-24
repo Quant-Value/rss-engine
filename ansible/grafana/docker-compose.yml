@@ -6,6 +6,7 @@ services:
     volumes:
       - "/mnt/efs/grafana:/grafana"
       - "/home/ubuntu/conf:/config"
+      # - "/home/ubuntu/grafana:/grafana"
     environment:
       - "GF_PATHS_CONFIG=/config/custom.ini"
     ports:
