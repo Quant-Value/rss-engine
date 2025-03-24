@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     volumes:
       - "/mnt/efs/grafana:/grafana"
-      # - "/home/ubuntu/grafana:/grafana"
+      - "/home/ubuntu/conf:/config"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - "GF_PATHS_CONFIG=/config/custom.ini"
     ports:
       - "3000:3000"
