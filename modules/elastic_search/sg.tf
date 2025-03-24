@@ -10,6 +10,12 @@ resource "aws_security_group" "elasticsearch" {
     protocol    = "tcp"
     self=true
   }
+    ingress {
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    security_groups = [var.sg_sw_worker]
+  }
   
 
   # Elasticsearch internal comunication

@@ -36,3 +36,8 @@ variable "environment" {
   description = "Ambiente (dev/prod)"
   #default     = "dev"
 }
+variable "subnet_ids" {
+  type        = list(string)
+  description = "IDs de las subnets privadas"
+
+}

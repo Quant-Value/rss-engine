@@ -1,7 +1,4 @@
 
-provider "aws" {
-  region = "eu-west-3"
-}
 
 resource "aws_key_pair" "key" {
   key_name   = "my-key-ES"

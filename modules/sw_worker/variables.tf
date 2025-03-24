@@ -43,3 +43,8 @@ variable "sg_group_server"{
 variable "dns_name_server"{
   type = string
 }
+variable "subnet_ids" {
+  type        = list(string)
+  description = "IDs de las subnets privadas"
+
+}
