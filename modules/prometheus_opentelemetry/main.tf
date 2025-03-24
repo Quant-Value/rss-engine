@@ -5,11 +5,10 @@ resource "aws_key_pair" "key" {
 
 
 resource "aws_instance" "ec2_node" {
-  count           = var.instance_count
   #ami             = "ami-091f18e98bc129c4e" # Ubuntu 24 ami londres
   ami             = var.ami_id
   instance_type   = "t3.medium"
-  subnet_id       = var.subnet_ids
+  subnet_id       = var.subnet_ids[0]
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
   
@@ -24,7 +23,7 @@ resource "aws_instance" "ec2_node" {
   }
 
   tags = {
-    Name = "Grupo2-prometheus-opentelemetry-i3-es-${count.index + 1}-${var.environment}",
+    Name = "Grupo2-prometheus-opentelemetry-i3-es-${var.environment}",
     Grupo="g2",
     DNS_NAME="i3-rss-engine-demo"
   }
