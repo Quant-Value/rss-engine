@@ -1,17 +1,10 @@
 #!/bin/bash
+
 SW_SERVER="i8-demo-rss-engine-demo.campusdual.mkcampus.com"
-# URL de S3 del archivo comprimido de forma manual
 bucket_url="s3://commoncrawl/crawl-data/CC-MAIN-2025-05/wat.paths.gz"
 source .env
-# Nombre del archivo comprimido (no es necesario almacenar el archivo descomprimido)
 archivo_comprimido="archivo_descargado.gz"
-
-# Descargar el archivo desde S3 usando AWS CLI y procesar directamente desde el pipe
-echo "Descargando y procesando el archivo desde S3: $bucket_url..."
-
-
 ES_USERNAME="elastic"
-
 INDEX_NAME="items-prueba"
 
 echo "Verificando si el índice existe..."
@@ -35,18 +28,29 @@ curl -X PUT "i1-demo-rss-engine-demo.campusdual.mkcampus.com:9200/$INDEX_NAME" \
           }
         }'
 
+# Algoritmo de backoff
+max_attempts=8
+attempt=0
+backoff_time=2  # Tiempo inicial de espera en segundos
 
+while (( attempt < max_attempts )); do
+    echo "Descargando y procesando el archivo desde S3: $bucket_url (Intento $((attempt + 1)))..."
+    
+    # Intenta ejecutar el comando
+    if aws s3 cp "$bucket_url" - | gunzip -c | xargs -I {} -P 20 docker exec -i myserver_add ./app-bluengo-worker add -server http://${SW_SERVER}:8080 -cmd "bash -c \"cd scripts && ./job.sh {}\"" -timeout 500; then
+        echo "Descarga y procesamiento completados exitosamente."
+        break  # Salir del bucle si tiene éxito
+    else
+        echo "Error al descargar o procesar el archivo. Esperando $backoff_time segundos antes de volver a intentar..."
+        sleep $backoff_time
+        backoff_time=$((backoff_time * 3))  # Duplicar el tiempo de espera
+        ((attempt++))
+    fi
+done
 
-# O si prefieres usar `xargs` para paralelizar
-#aws s3 cp "$bucket_url" - | gunzip -c | xargs -I {} -P 1 ./app add -server http://${SW_SERVER}:8080 -cmd "bash -c \"(time ./scripts/job.sh {}) 2>&1 | grep real >> time.txt && aws s3 cp time.txt s3://proyecto-devops-grupo-dos/workers/$(hostname -I | awk '{print $1}') \"" -timeout 100
-
-#aws s3 cp "$bucket_url" - | gunzip -c | xargs -I {} -P 20 ./app add -server http://${SW_SERVER}:8080 -cmd "bash -c \"cd scripts &&./job.sh {}\"" -timeout 500
-aws s3 cp "$bucket_url" - | gunzip -c | xargs -I {} -P 20 docker exec -i myserver_add ./app-bluengo-worker add -server http://${SW_SERVER}:8080 -cmd "bash -c \"cd scripts && ./job.sh {}\"" -timeout 500
-#aws s3 cp "$bucket_url" - | gunzip -c| head -n 2  | xargs -I {} -P 20 ./app add -server http://${SW_SERVER}:8080 -cmd "bash -c \"cd scripts &&./job.sh {}\"" -timeout 500
-
-
-#aws s3 cp "$bucket_url" - | gunzip -c | echo {}
-
-#aws s3 cp "$bucket_url" - | gunzip -c | xargs -I {} -P 1 ./app add -server http://${SW_SERVER}:8080 -cmd " (time sleep 4 )2>&1 | grep real >> time.txt && aws s3 cp time.txt s3://proyecto-devops-grupo-dos/workers/$(hostname -I | awk '{print $1}')/time.txt " -timeout 15
+if (( attempt == max_attempts )); then
+    echo "Se alcanzó el número máximo de intentos. Abortando."
+    exit 1
+fi
 
 echo "Proceso completado."
