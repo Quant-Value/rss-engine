@@ -15,7 +15,8 @@ sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
 
 # Guardar el ID de la instancia y el DNS en archivos
 echo "${instance_id}" > /etc/rss-engine-name
-echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+#echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+echo "${record_name}" > /etc/record_name
 
 # Instalar Docker
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
@@ -42,7 +43,7 @@ private_ip=$(hostname -I | awk '{print $1}')
 
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
 zone_id=${zone}  # ID de tu zona de Route 53
-record_name="${record_name}"
+record_name=$(cat /etc/record_name)
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
                 --change-batch '{
@@ -67,7 +68,7 @@ sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 set -e
 zone_id=${zone}
 private_ip=$(hostname -I | awk '{print $1}')
-record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
+record_name=$(cat /etc/record_name)
 echo "IP y record_name: $private_ip $record_name"
 
 json=$(cat <<EOT
@@ -192,7 +193,7 @@ done
 }
 
 # Uso de la función
-dns_name="${record_name}"
+dns_name=$(cat /etc/record_name)
 port=22
 wait_for_dns_resolution "$dns_name" "$port"
 

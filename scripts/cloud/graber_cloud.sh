@@ -1,11 +1,11 @@
 #!/bin/bash
 
-SW_SERVER="i8-demo-rss-engine-demo.campusdual.mkcampus.com"
+#SW_SERVER="i8-demo-rss-engine-demo.campusdual.mkcampus.com"
 bucket_url="s3://commoncrawl/crawl-data/CC-MAIN-2025-05/wat.paths.gz"
 source .env
 archivo_comprimido="archivo_descargado.gz"
 ES_USERNAME="elastic"
-INDEX_NAME="items-prueba"
+INDEX_NAME="feed-items-demo"
 
 echo "Verificando si el índice existe..."
 curl -X PUT "i1-demo-rss-engine-demo.campusdual.mkcampus.com:9200/$INDEX_NAME" \

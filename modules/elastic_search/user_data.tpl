@@ -12,10 +12,13 @@ sudo apt-get update -y
 sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt
 
 # Guardar el ID de la instancia y el DNS en archivos
-echo "${instance_id}" > /etc/rss-engine-name
-echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+
 echo "${zone}" > /etc/zone_id
 echo "${efs_dns_name}" > /etc/efs_id
+
+echo "${instance_id}" > /etc/rss-engine-name
+#echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+echo "${record_name}" > /etc/record_name
 
 # Instalar Docker
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
@@ -43,7 +46,7 @@ private_ip=$(hostname -I | awk '{print $1}')
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
 #zone_id="Z06113313M7JJFJ9M7HM8"  # ID de tu zona de Route 53
 zone_id=${zone}
-record_name="${instance_id}-rss-engine-demo.campusdual.mkcampus.com"
+record_name=$(cat /etc/record_name)
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
                 --change-batch '{
@@ -67,7 +70,7 @@ sudo tee /usr/local/bin/update-dns.sh > /dev/null <<'EOF'
 set -e
 
 private_ip=$(hostname -I | awk '{print $1}')
-record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
+record_name=$(cat /etc/record_name)
 echo "IP y record_name: $private_ip $record_name"
 
 json=$(cat <<EOT
@@ -222,7 +225,7 @@ log_message "Ya solo falta ejecutar los playbooks"
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
 sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
---network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} \
+--network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} -e ENVIRON=${environment} \
 --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml  "
 
 log_message "FIN"

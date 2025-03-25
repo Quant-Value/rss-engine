@@ -21,17 +21,20 @@
     - name: Set the password as a variable
       set_fact:
         elasticpass: "{{ secret_value.stdout | from_json | json_query('elasticpass') }}"
+    - name: Define ENVIRON variable
+      set_fact:
+        ENVIRON: "{{ lookup('env', 'ENVIRON') | default('demo') }}"
 
     - name: Generate seed_hosts list with DNS names
       set_fact:
-        SEED_HOSTS: "{{ SEED_HOSTS | default([]) + ['i' + (item|string) + '-demo-rss-engine-demo.campusdual.mkcampus.com'] }}"
+        SEED_HOSTS: "{{ SEED_HOSTS | default([]) + ['i0' + (item|string) + '-'+ ENVIRON +'-rss-engine-demo.campusdual.mkcampus.com'] }}"
       with_sequence: start=0 end={{ lookup('env', 'NUM_NODES') | int - 1 }}
       loop_control:
         loop_var: item
 
     - name: Generate excluded host
       set_fact:
-        EXCLUDE_HOST: "{{ ['i', INDEX_VAR, '-demo-rss-engine-demo.campusdual.mkcampus.com'] | join('') }}"
+        EXCLUDE_HOST: "{{ ['i', INDEX_VAR, '-' , ENVIRON , '-rss-engine-demo.campusdual.mkcampus.com'] | join('') }}"
 
     
     - name: Generate seed_hosts excluding the node with the index

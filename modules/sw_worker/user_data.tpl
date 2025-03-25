@@ -14,7 +14,8 @@ sudo apt-get install -y nfs-common unzip dos2unix curl lsb-release python3-apt g
 
 # Guardar el ID de la instancia y el DNS en archivos
 echo "${instance_id}" > /etc/rss-engine-name
-echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+#echo "-rss-engine-demo.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+echo "${record_name}" > /etc/record_name
 
 # Instalar Docker
 sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
@@ -49,7 +50,7 @@ public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Re
 
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
 zone_id=${zone}  # ID de tu zona de Route 53
-record_name="${record_name}"
+record_name=$(cat /etc/record_name)
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
                 --change-batch '{
@@ -77,7 +78,7 @@ private_ip=$(hostname -I | awk '{print $1}')
 instance_id=$(aws ec2 describe-instances --filters  "Name=private-ip-address,Values=$private_ip" --query "Reservations[0].Instances[0].InstanceId" --output text)
 # Get IP addresses
 public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
-record_name="$(cat /etc/rss-engine-name | tr -d '\n')$(cat /etc/rss-engine-dns-suffix | tr -d '\n')"
+record_name=$(cat /etc/record_name)
 echo "IP y record_name: $public_ip $record_name"
 
 json=$(cat <<EOT
@@ -243,7 +244,7 @@ log_message "start playbooks"
 sudo docker run --rm -v /home/ubuntu/play:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
 --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
 --privileged --name ansible-playbook-container \
---entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml -e DNS_SERVER=$(cat /etc/dns_name) "
+--entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml -e DNS_SERVER=$(cat /etc/dns_name) -e ENVIRON=${environment} "
 
 log_message "end"
 

@@ -10,7 +10,8 @@ hostnamectl set-hostname "i4-rss-engine-demo.campusdual.mkcampus.com"
 
 # Set /etc/rss-engine and /etc/rss-engine-dns-suffix
 echo -n "${inumber}" > /etc/rss-engine-name
-echo -n "${suffix_name}.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+#echo -n "${suffix_name}.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
+echo "${record_name}" > /etc/record_name
 
 efs_dns_name=${efs_dns_name}
 
@@ -57,7 +58,7 @@ instance_id=$(aws ec2 describe-instances --filters "Name=instance-state-name,Val
 # Get IP addresses
 PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 
-record_name="$(cat /etc/rss-engine-name)$(cat /etc/rss-engine-dns-suffix)"
+record_name=$(cat /etc/record_name)
 zone_id=${zone}
 
 # Set Route 53 DNS records for the EC2 instance (Public and Private IPs)
@@ -88,7 +89,7 @@ PUBLIC_IP=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Re
 
 
 
-record_name="i4-rss-engine-demo.campusdual.mkcampus.com"
+record_name=$(cat /etc/record_name)
 zone_id=${zone}
 
 aws route53 change-resource-record-sets --hosted-zone-id $zone_id --change-batch "{

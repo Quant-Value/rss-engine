@@ -31,9 +31,11 @@ resource "aws_instance" "elasticsearch_nodes" {
   }
 
   user_data = templatefile("${path.module}/user_data.tpl", {
-    instance_id = "i${count.index}-${var.environment}"  # Pasar el ID de la instancia dinámicamente
+    instance_id = "i0${count.index}-${var.environment}"  # Pasar el ID de la instancia dinámicamente
+    record_name= "i0${count.index}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
     cantidad    = var.amount  # Pasar la variable cantidad al user_data.tpl
     index = count.index
+    environment= var.environment
     zone=var.hosted_zone_id
     efs_dns_name=var.efs_dns_name
   })

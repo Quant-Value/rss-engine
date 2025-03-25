@@ -26,7 +26,8 @@ resource "aws_instance" "public_ec2" {
 
   user_data = templatefile("${path.module}/user_data.tpl", {
     inumber = "i4"
-    suffix_name = "-rss-engine-demo"
+    record_name= "i4-${var.environment}-rss-engine-demo.campusdual.mkcampus.com"
+    #suffix_name = "-rss-engine-demo"
     zone = var.hosted_zone_id
     efs_dns_name=var.efs_id
   })

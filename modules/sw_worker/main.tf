@@ -32,6 +32,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
     instance_id = "i${count.index + 5}-${var.environment}"
     record_name = "i${count.index + 5}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
     zone=var.hosted_zone_id
+    environment= var.environment
     sw_server_dns_name=var.dns_name_server #cambiar esto por un output
   })
 

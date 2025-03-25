@@ -49,6 +49,9 @@
         dest: /home/ubuntu/scripts/.env
         content: |
           ES_PASSWORD={{ elasticpass }}
+          AWS_ELASTICSEARCH_ALB_DNS=i00-{{ENVIRON}}-rss-engine-demo.campusdual.mkcampus.com
+          METRICS_URL=http://i3-{{ENVIRON}}-rss-engine-demo.campusdual.mkcampus.com:4318/v1/metrics
+          SW_SERVER=i8-{{ENVIRON}}-rss-engine-demo.campusdual.mkcampus.com
         mode: '0600'
 
 
