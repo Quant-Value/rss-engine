@@ -17,7 +17,7 @@
         ENVIRON: "{{ lookup('env', 'ENVIRON') | default('demo') }}"
     - name: Retrieve secret from AWS Secrets Manager
       command: >
-        aws secretsmanager get-secret-value --secret-id "rss-engine-imatia-"{{ENVIRON}} --query SecretString --output text
+        aws secretsmanager get-secret-value --secret-id "my-rss-engine-imatia-"{{ENVIRON}} --query SecretString --output text
       register: secret_value
 
     - name: Set the password as a variable
