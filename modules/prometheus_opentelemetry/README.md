@@ -52,7 +52,7 @@ module "prometheus" {
   efs_id             = aws_efs_file_system.this.dns_name
   sg_default_id      = data.aws_security_group.default.id
   sg_grafana         = module.grafana.sg_id
-  depends_on         = [module.sw_workers, aws_efs_mount_target.this]
+  depends_on         = [module.sw_workers]
 }
 ```
 
