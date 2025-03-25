@@ -121,7 +121,7 @@ The `user_data.tpl` template configures the EC2 instances on startup. Here's a b
 * Retrieves the Elasticsearch admin password from AWS Secrets Manager.
 * Configures Elasticsearch using Ansible playbooks.
 * Generates SSL certificates.
-* Starts an Ansible container to run the playbooks.
+* Starts Elasticsearch using Docker Compose.
 
 ## Ansible Playbook (`install2.yml`)
 
