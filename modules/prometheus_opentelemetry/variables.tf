@@ -61,4 +61,8 @@ variable "sg_default_id"{
 variable "sg_wk" {
   type = string
 }
+
+variable "sg_grafana" {
+  type = string
+}
  

@@ -29,6 +29,14 @@ resource "aws_security_group" "prometheus" {
     security_groups = [var.sg_wk]
   }
 
+     ingress {
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
+    security_groups = [var.sg_grafana]
+  }
+
+
   egress {
     from_port   = 0
     to_port     = 0
