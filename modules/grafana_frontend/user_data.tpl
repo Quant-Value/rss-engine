@@ -139,8 +139,9 @@ curl -o /home/ubuntu/docker-compose.yml https://raw.githubusercontent.com/campus
 
 mkdir /home/ubuntu/conf
 environment=${environment}
+echo ${secret_name} > /etc/secret_name
 # Retrieve the secret from AWS Secrets Manager
-secret_value=$(aws secretsmanager get-secret-value --secret-id "1-rss-engine-imatia-${environment}" --query SecretString --output text)
+secret_value=$(aws secretsmanager get-secret-value --secret-id $(cat /etc/secret_name) --query SecretString --output text)
 # Extract the 'elasticpass' field from the JSON secret
 elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 # Path to the custom.ini file

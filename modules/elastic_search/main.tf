@@ -31,5 +31,6 @@ resource "aws_instance" "elasticsearch_nodes" {
     environment= var.environment
     zone=var.hosted_zone_id
     efs_dns_name=var.efs_dns_name
+    secret_name=var.secret_name
   })
 }

@@ -88,3 +88,6 @@ variable "sg_otel"{
 variable "aws_key_name"{
   type = string
 }
+variable "secret_name"{
+  type=string
+}

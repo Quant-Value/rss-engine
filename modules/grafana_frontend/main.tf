@@ -26,6 +26,7 @@ resource "aws_instance" "public_ec2" {
     zone = var.hosted_zone_id
     efs_dns_name=var.efs_id
     environment=var.environment
+    secret_name=var.secret_name
   })
 
   depends_on = [aws_security_group.sg]

@@ -12,6 +12,7 @@ module "sw_server" {
   hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
   aws_secret_arn=data.aws_secretsmanager_secret.rss_engine_imatia.arn
+  aws_secret_name="${var.secret_name}${var.environment}"
   ami_id=data.aws_ami.ubuntu_latest.id
 
   aws_key_name=aws_key_pair.key_ec2.key_name
@@ -36,6 +37,7 @@ module "sw_workers" {
   hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
   aws_secret_arn=data.aws_secretsmanager_secret.rss_engine_imatia.arn
+  aws_secret_name="${var.secret_name}${var.environment}"
   ami_id=data.aws_ami.ubuntu_latest.id
 
   aws_key_name=aws_key_pair.key_ec2.key_name
@@ -63,10 +65,11 @@ module "elastic" {
   hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
   aws_secret_arn=data.aws_secretsmanager_secret.rss_engine_imatia.arn
+  aws_secret_name="${var.secret_name}${var.environment}"
   ami_id=data.aws_ami.ubuntu_latest.id
   subnet_ids=data.aws_subnets.private_subnets.ids
 
-  efs_dns_name=aws_efs_file_system.this.dns_name
+  efs_id=var.efs_dns_name
   sg_default_id=data.aws_security_group.default.id
   sg_grafana=module.grafana.sg_id
   sg_otel=module.prometheus.i3_sg_id
@@ -89,7 +92,7 @@ module "prometheus" {
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
   ami_id=data.aws_ami.ubuntu_latest.id
   subnet_ids=data.aws_subnets.private_subnets.ids
-  efs_id=aws_efs_file_system.this.dns_name
+  efs_id=var.efs_dns_name
   sg_default_id=data.aws_security_group.default.id
   sg_grafana=module.grafana.sg_id
 
@@ -114,9 +117,10 @@ module "grafana" {
   hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
   environment = var.environment
   aws_secret_arn = data.aws_secretsmanager_secret.rss_engine_imatia.arn
+  aws_secret_name="${var.secret_name}${var.environment}"
   depends_on=[aws_efs_mount_target.this]
   sg_default_id=data.aws_security_group.default.id
-  efs_id=aws_efs_file_system.this.dns_name
+  efs_id=var.efs_dns_name
 
   aws_key_name=aws_key_pair.key_ec2.key_name
 }

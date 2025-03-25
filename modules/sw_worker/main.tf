@@ -31,6 +31,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
     zone=var.hosted_zone_id
     environment= var.environment
     sw_server_dns_name=var.dns_name_server #cambiar esto por un output
+    secret_name=var.secret_name
   })
 
   # Aquí no necesitamos provisioner "remote-exec", sino que usaremos Ansible

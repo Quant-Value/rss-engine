@@ -71,3 +71,6 @@ variable "num_availability_zones" {
 variable "aws_key_name"{
   type = string
 }
+variable "secret_name"{
+  type=string
+}
