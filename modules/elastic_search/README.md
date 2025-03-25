@@ -1,131 +1,144 @@
 # Elasticsearch Deployment Module
 
-This module automates the deployment of an Elasticsearch cluster on AWS. It leverages Terraform for infrastructure provisioning and Ansible for Elasticsearch configuration and setup.
+This module automates the deployment of an Elasticsearch cluster on AWS EC2 instances, configured for use with the i4-rss-engine. It sets up the necessary infrastructure, including EC2 instances, IAM roles, security groups, EFS integration, and Docker, and configures Elasticsearch for secure and efficient operation. It also configures DNS records using Route53.
 
-## Overview
+## Features
 
-The module performs the following key actions:
+* **EC2 Instance Deployment:** Provisions multiple EC2 instances to host the Elasticsearch cluster.
+* **IAM Role and Policy:** Creates an IAM role with the necessary permissions for the EC2 instances to access other AWS services, such as ECR, S3, Route 53, and Secrets Manager.
+* **Security Group Configuration:** Configures security groups to allow Elasticsearch communication (ports 9200 and 9300) and SSH access.
+* **EFS Integration:** Mounts an Amazon EFS volume to the EC2 instances for persistent Elasticsearch snapshot storage.
+* **Docker Installation:** Installs and configures Docker on the EC2 instances.
+* **Elasticsearch Deployment:** Deploys Elasticsearch using Docker Compose, with configurations for cluster formation, security, and data persistence.
+* **Route 53 Integration:** Creates or updates DNS A records in Route 53, pointing to the private IPs of the EC2 instances. This allows for accessing the Elasticsearch cluster using hostnames.
+* **Automatic DNS Update:** Sets up a systemd service to automatically update the Route 53 DNS records whenever the EC2 instances restart and their private IP addresses change.
+* **Secrets Management:** Retrieves the Elasticsearch admin password from AWS Secrets Manager.
+* **SSL/TLS Security:** Configures Elasticsearch with SSL/TLS using certificates from S3.
 
-* **Provisions AWS Infrastructure:**
-    * Creates an EC2 instance to host Elasticsearch.
-    * Sets up a security group with necessary ingress and egress rules (SSH, Elasticsearch, etc.).
-    * Creates an EC2 Key Pair for SSH access.
-    * Configures an IAM role and instance profile for the EC2 instance, granting it the necessary permissions.
-* **Configures Elasticsearch:**
-    * Uses Ansible playbooks to:
-        * Install and configure Elasticsearch within a Docker container.
-        * Generate a `docker-compose.yml.j2` file.
-        * Start the Elasticsearch cluster using Docker Compose.
-        * Retrieves secrets (like the Elasticsearch password) from AWS Secrets Manager.
-        * Dynamically configure seed hosts for cluster discovery.
-        * Sets up DNS records in Route53.
+## Architecture
+
+The architecture consists of:
+
+* Multiple EC2 instances running Ubuntu.
+* An EFS volume mounted to the EC2 instances for persistent snapshot storage.
+* Security Groups allowing access to the EC2 instances.
+* IAM Role and Instance Profile.
+* Route 53 for DNS management.
+* Docker and Docker Compose.
+* Elasticsearch.
+* AWS Secrets Manager.
+* S3 for certificate storage.
 
 ## Prerequisites
 
 Before using this module, ensure you have the following:
 
-* **AWS Account:** You need an active AWS account with sufficient permissions to create EC2 instances, security groups, IAM roles, and Route53 records.
-* **Terraform:** Install Terraform (version X.X.X or later) on your local machine.
-* **Ansible:** Install Ansible (version X.X.X or later) on your local machine.
-* **AWS CLI:** Install and configure the AWS Command Line Interface (CLI). This is used by the Ansible playbooks.
-* **SSH Key Pair:** An SSH key pair to access the EC2 instance. The public key should be stored at the path specified by the `public_key_path` variable (default: `../../my-ec2-key.pub`).
-* **Hosted Zone:** A Route 53 hosted zone to create DNS records for the Elasticsearch nodes.
-* **Secrets Manager Secret:** A secret in AWS Secrets Manager containing the Elasticsearch password. The ARN of this secret is required.
-* **EFS ID:** The ID of the Elastic File System.
-* **Default Security Group ID:** The ID of the default security group.
+* An AWS account.
+* An existing VPC, Subnets, and Security Groups.
+* A registered domain and a Hosted Zone in Route 53.
+* An SSH key pair for accessing the EC2 instances.
+* The AMI ID for the EC2 instances.
+* The ARN of the hosted zone.
+* The ID of the hosted zone.
+* The ARN of the AWS Secret containing the Elasticsearch admin password.
+* The DNS name of the EFS volume.
+* An S3 bucket containing SSL/TLS certificates.
 
-## Uso
+## Getting Started
 
-Para utilizar este módulo, necesitas tener Terraform instalado y configurado con tus credenciales de AWS. A continuación, puedes declarar el módulo en tu configuración de Terraform y proporcionar los valores requeridos.
+### Usage
+
+**Define variables:**
+Create a `terraform.tfvars` file or set the following variables in your Terraform configuration:
+
+**How to call the module:**
 
 ```terraform
-module "elastic" {
-  source = "../modules/elastic_search"
+module "elasticsearch" {
+  source = "../modules/elasticsearch_deployment"
 
-  aws_region=var.aws_region
-  vpc_id=var.vpc_id
-  private_key_path=var.private_key_path
-  public_key_path=var.public_key_path
-  environment=var.environment
-
-  amount= 3
-
-  sg_sw_worker=module.sw_server.sg_id_server #same sg as workers
-
-  num_availability_zones=local.num_availability_zones
-
-  hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
-  hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
-  aws_secret_arn=data.aws_secretsmanager_secret.my_secret.arn
-  ami_id=data.aws_ami.ubuntu_latest.id
-  subnet_ids=data.aws_subnets.private_subnets.ids
-
-  efs_dns_name=aws_efs_file_system.this.dns_name
-  sg_default_id=data.aws_security_group.default.id
-  sg_grafana=module.grafana.sg_id
-  sg_otel=module.prometheus.i3_sg_id
-
-  depends_on=[module.sw_workers,module.prometheus,module.grafana,aws_efs_mount_target.this]
-
+  vpc_id = var.vpc_id
+  public_key_path = var.public_key_path
+  amount = 3
+  ami_id = data.aws_ami.ubuntu_latest.id
+  subnet_ids = data.aws_subnets.private_subnets.ids
+  hosted_zone = data.aws_route53_zone.my_hosted_zone.id
+  num_availability_zones = local.num_availability_zones
+  hosted_zone_arn = data.aws_route53_zone.my_hosted_zone.arn
+  hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
+  environment = var.environment
+  aws_secret_arn = aws_secretsmanager_secret.rss_engine_imatia.arn
+  efs_dns_name = aws_efs_file_system.this.dns_name
+  sg_default_id = data.aws_security_group.default.id
+  sg_grafana = data.aws_security_group.grafana.id
+  sg_otel = data.aws_security_group.otel.id
+  sg_sw_worker = data.aws_security_group.worker.id
+  aws_key_name = aws_key_pair.key_ec2.key_name
 }
-```
-## Module Inputs
+``` 
+## Inputs
 
-The module accepts the following variables:
+| Name                     | Description                                                                                                                                                                                                 | Type           | Default                | Required |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------------- | -------- |
+| `ami_id`                 | The AMI ID to use for the EC2 instances.                                                                                                                                                                   | `string`       | n/a                    | Yes      |
+| `aws_secret_arn`         | ARN of the AWS Secrets Manager secret containing the Elasticsearch admin password.                                                                                                                          | `string`       | n/a                    | Yes      |
+| `environment`            | Environment (e.g., `dev`, `prod`).                                                                                                                                                                         | `string`       | n/a                    | Yes      |
+| `efs_dns_name`           | The DNS name of the EFS volume.                                                                                                                                                                           | `string`       | n/a                    | Yes      |
+| `hosted_zone_arn`        | ARN of the Route 53 Hosted Zone.                                                                                                                                                                           | `string`       | n/a                    | Yes      |
+| `hosted_zone_id`         | ID of the Route 53 Hosted Zone.                                                                                                                                                                            | `string`       | n/a                    | Yes      |
+| `num_availability_zones` | Number of Availability Zones to use.                                                                                                                                                                       | `number`       | n/a                    | No       |
+| `public_key_path`        | Path to the SSH public key file associated with the private key for accessing the EC2 instances.                                                                                                             | `string`       | `../../my-ec2-key.pub` | No       |
+| `sg_default_id`          | Security Group to assign to the instances.                                                                                                                                                                   | `string`       | n/a                    | Yes      |
+| `subnet_ids`             | List of IDs of the subnets where the EC2 instances will be launched.                                                                                                                                       | `list(string)` | n/a                    | Yes      |
+| `vpc_id`                 | ID of the VPC where the EC2 instances will be launched.                                                                                                                                                     | `string`       | n/a                    | Yes      |
+| `sg_grafana`             | Security group ID for Grafana.                                                                                                                                                                             | `string`       | n/a                    | Yes      |
+| `sg_otel`                | Security group ID for OpenTelemetry.                                                                                                                                                                       | `string`       | n/a                    | Yes      |
+| `sg_sw_worker`           | Security group ID for worker services.                                                                                                                                                                     | `string`       | n/a                    | Yes      |
+| `aws_key_name`           | Name of the AWS key pair used for SSH access to the EC2 instances.                                                                                                                                          | `string`       | n/a                    | Yes      |
+| `amount`                 | Number of EC2 instances to launch for the Elasticsearch cluster.                                                                                                                                          | `number`       | `3`                    | No       |
 
-| Name                       | Description                                                                                                 | Type           | Default                        | Required |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------ | -------- |
-| `public_key_path`          | Path to the public key file for SSH access.                                                                  | `string`       | `../../my-ec2-key.pub`          | No       |
-| `ami_id`                   | The AMI ID to use for the EC2 instance.                                                                     | `string`       |                                | Yes      |
-| `subnet_ids`               | List of IDs of the subnets where the EC2 instance will be launched.                                         | `list(string)` |                                | Yes      |
-| `vpc_id`                   | ID of the VPC.                                                                                              | `string`       |                                | Yes      |
-| `hosted_zone`              | The Route 53 hosted zone name.                                                                                | `string`       |                                | Yes      |
-| `num_availability_zones` | Number of Availability Zones to use.                                                                          | `number`       |                                | Yes      |
-| `hosted_zone_arn`          | ARN of the Route 53 hosted zone.                                                                              | `string`       |                                | Yes      |
-| `hosted_zone_id`           | ID of the Route 53 hosted zone.                                                                               | `string`       |                                | Yes      |
-| `amount`                   | Amount of instances.                                                                                          | `number`       | `3`                            | No       |
-| `environment`              | Environment (e.g., "dev", "prod"). Used in naming resources.                                                 | `string`       |                                | Yes      |
-| `aws_secret_arn`           | ARN of the AWS Secrets Manager secret containing the Elasticsearch password.                                 | `string`       |                                | Yes      |
-| `efs_id`                   | The ID of the EFS.                                                                                           | `string`       |                                | Yes      |
-| `sg_default_id`            | The ID of the default security group.                                                                        | `string`       |                                | Yes      |
+## Outputs
 
-## Module Outputs
+| Name                  | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| `instance_private_ips` | The private IP addresses of the EC2 instances.     |
+| `sg_id`               | The ID of the security group created.             |
 
-The module exports the following values:
+## User Data
 
-| Name                   | Description                                   |
-| ---------------------- | --------------------------------------------- |
-| `instance_public_ip`   | Public IP address of the EC2 instance.        |
-| `instance_private_ip`  | Private IP address of the EC2 instance.       |
-| `sg_id`                | ID of the security group created.             |
+The `user_data.tpl` template configures the EC2 instances on startup. Here's a breakdown of the actions performed:
 
-## Security
+* System updates and dependency installation (unzip, curl, nfs-common, git, python3-pip, docker).
+* Hostname configuration.
+* EFS volume mounting and persistent mount configuration via `/etc/fstab`.
+* AWS CLI installation.
+* Docker installation and startup.
+* Adds the `ubuntu` user to the `docker` group.
+* Retrieves the instance ID and private IP.
+* Configures Route 53 A records with the instances' private IPs.
+* Creates a systemd service (`update-dns.service`) to keep the Route 53 records updated on reboot.
+* Clones the Elasticsearch Docker Compose file and Ansible playbooks from GitHub.
+* Retrieves the Elasticsearch admin password from AWS Secrets Manager.
+* Configures Elasticsearch using Ansible playbooks.
+* Generates SSL certificates.
+* Starts Elasticsearch using Docker Compose.
 
-The module configures the following security group rules:
+## Ansible Playbook (`install2.yml`)
 
-* **Ingress:**
-    * SSH (port 22) access from anywhere (0.0.0.0/0). **Important:** For production environments, it is *highly* recommended to restrict this to specific IP addresses or CIDR blocks.
-    * Elasticsearch traffic (port 3000) from anywhere (0.0.0.0/0).
-* **Egress:**
-    * All outbound traffic allowed (0.0.0.0/0).
+The `install2.yml` playbook configures the Elasticsearch nodes. Here's a breakdown of the tasks performed:
 
-
-## Important Considerations
-
-* **Security:** The default security group rules allow access from anywhere (0.0.0.0/0). For production deployments, you *must* restrict access to specific IP addresses or CIDR blocks for both SSH (port 22) and Elasticsearch (port 3000).
-* **EC2 Instance Type:** The default instance type is `t3.medium`. Adjust this based on your performance and cost requirements.
-* **Subnets:** Ensure that the subnets you provide have a route to the internet (for the instance to be publicly accessible) or a NAT gateway (for private subnets).
-* **Elasticsearch Configuration:** The Elasticsearch configuration is managed by Ansible. You can customize the `docker-compose.yml.j2` template in the `ansible/playbooks` directory to modify Elasticsearch settings.
-* **Secrets Management:** The module uses AWS Secrets Manager to store the Elasticsearch password. Ensure that the EC2 instance's IAM role has the necessary permissions to access this secret.
-* **Route 53:** The module creates DNS records in Route 53. Ensure that the hosted zone is correctly configured and that the IAM role has the necessary permissions to manage records in the hosted zone.
-* **Docker Compose Template:** The `docker-compose.yml.j2` template is located in the `ansible/playbooks` directory. It is crucial to review and customize this template according to your specific Elasticsearch configuration needs, including network settings, resource allocation, and any desired plugins or modules.
-* **User Data Template:** The `user_data.tpl` template is located in the module's directory. It's responsible for the initial setup of the EC2 instance, including installing Docker and running the Ansible playbook.
-
-## Dependencies
-
-* Terraform AWS Provider
-* Ansible Core
-
-
-
+* **Debug environment variables:** Displays the values of `NUM_NODES` and `INDEX` environment variables.
+* **Set the INDEX variable:** Loads the `INDEX` environment variable and saves it as `INDEX_VAR`.
+* **Define ENVIRON variable:** Sets the `ENVIRON` variable with a default value of `demo`.
+* **Retrieve secret from AWS Secrets Manager:** Fetches the Elasticsearch password from AWS Secrets Manager.
+* **Set the password as a variable:** Extracts the password from the Secrets Manager output and saves it as `elasticpass`.
+* **Generate `seed_hosts` list with DNS names:** Creates a list of seed hosts using DNS names based on the number of nodes.
+* **Generate excluded host:** Creates the DNS name of the current node to be excluded from the seed hosts list.
+* **Generate `seed_hosts` excluding the node with the index:** Creates a list of seed hosts excluding the current node.
+* **Resolve DNS names to IPs using dig:** Resolves the DNS names of the seed hosts to their corresponding IPs.
+* **Store resolved IPs:** Stores the resolved IPs in a list.
+* **Show resolved IPs:** Displays the resolved IPs.
+* **Debug `seed_hosts` list:** Displays the generated seed hosts lists.
+* **Generate `docker-compose.yml` from template:** Creates the `docker-compose.yml` file from the `docker-compose.yml.j2` template, configuring Elasticsearch with the retrieved password and seed host IPs.
+* **Start Elasticsearch using Docker Compose:** Starts the Elasticsearch cluster using Docker Compose.
 
