@@ -9,25 +9,16 @@ resource "random_password" "example" {
 
 
 # Crear el secreto solo si no existe
-resource "aws_secretsmanager_secret" "rss_engine_imatia" {
-  name        = "demo-rss-engine-imatia-${var.environment}"
-  description = "Secreto para RSS Engine con elasticpass generado aleatoriamente"
-  
-  tags = {
-    Name = "RSS Engine Imatia Secret"
-  }
-  lifecycle {
-    prevent_destroy = true
-  }
+data "aws_secretsmanager_secret" "rss_engine_imatia" {
+  name = "demo-rss-engine-imatia-${var.environment}"
 }
-
 # Crear la versión del secreto con el par clave-valor
 resource "aws_secretsmanager_secret_version" "rss_engine_imatia_version" {
-  secret_id     = aws_secretsmanager_secret.rss_engine_imatia.id 
+  secret_id     = data.aws_secretsmanager_secret.rss_engine_imatia.id 
   secret_string = jsonencode({
     elasticpass = random_password.example.result
   })
-  depends_on = [aws_secretsmanager_secret.rss_engine_imatia]
+  depends_on = [data.aws_secretsmanager_secret.rss_engine_imatia]
 }
 
 
