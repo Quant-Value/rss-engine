@@ -29,3 +29,6 @@ variable "public_key_path" {
 variable "secret_name"{
   type=string
 }
+variable "efs_dns_name"{
+  type=string
+}
