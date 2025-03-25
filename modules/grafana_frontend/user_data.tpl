@@ -3,14 +3,13 @@
 set -x
 # Update the system and install necessary dependencies
 apt-get update -y
-apt-get install -y unzip curl nfs-common git sudo python3-pip
+apt-get install -y unzip curl nfs-common git python3-pip
 
 # Set hostname
-hostnamectl set-hostname "i4-rss-engine-demo.campusdual.mkcampus.com"
+#hostnamectl set-hostname "i4-rss-engine-demo.campusdual.mkcampus.com"
 
 # Set /etc/rss-engine and /etc/rss-engine-dns-suffix
 echo -n "${inumber}" > /etc/rss-engine-name
-#echo -n "${suffix_name}.campusdual.mkcampus.com" > /etc/rss-engine-dns-suffix
 echo "${record_name}" > /etc/record_name
 
 efs_dns_name=${efs_dns_name}
@@ -139,8 +138,9 @@ sudo systemctl restart docker
 curl -o /home/ubuntu/docker-compose.yml https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/grafana/docker-compose.yml
 
 mkdir /home/ubuntu/conf
+environment=${environment}
 # Retrieve the secret from AWS Secrets Manager
-secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text)
+secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia-${environment}" --query SecretString --output text)
 # Extract the 'elasticpass' field from the JSON secret
 elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 # Path to the custom.ini file

@@ -1,7 +1,7 @@
 #!/bin/bash
 #METRICS_URL="http://i3-demo-rss-engine-demo.campusdual.mkcampus.com:4318/v1/metrics"
 #set -x
-
+source .env
 # Asegurarse de que se pase el JSON como argumento
 if [ $# -eq 0 ]; then
   echo "Por favor, proporciona el archivo JSON de métricas como argumento."

@@ -12,12 +12,12 @@ output "random_password" {
 }
 */
 data "aws_secretsmanager_secret" "rss_engine_imatia" {
-  name = "rss-engine-imatia"
+  name = "rss-engine-imatia-${var.environment}"
 }
 # Crear el secreto solo si no existe
 resource "aws_secretsmanager_secret" "rss_engine_imatia" {
   count       = length(data.aws_secretsmanager_secret.rss_engine_imatia.id) == 0 ? 1 : 0
-  name        = "rss-engine-imatia"
+  name        = "rss-engine-imatia-${var.environment}"
   description = "Secreto para RSS Engine con elasticpass generado aleatoriamente"
   
   tags = {
