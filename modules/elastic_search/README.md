@@ -68,7 +68,7 @@ module "elasticsearch" {
   hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
   environment = var.environment
   aws_secret_arn = aws_secretsmanager_secret.rss_engine_imatia.arn
-  efs_dns_name = aws_efs_file_system.this.dns_name
+  efs_dns_name = var.efs_dns_name
   sg_default_id = data.aws_security_group.default.id
   sg_grafana = data.aws_security_group.grafana.id
   sg_otel = data.aws_security_group.otel.id
