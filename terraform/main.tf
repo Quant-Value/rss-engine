@@ -11,7 +11,7 @@ module "sw_server" {
   subnet_ids=data.aws_subnets.public_subnets.ids
   hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
-  aws_secret_arn=data.aws_secretsmanager_secret.my_secret.arn
+  aws_secret_arn=aws_secretsmanager_secret.rss_engine_imatia.arn
   ami_id=data.aws_ami.ubuntu_latest.id
 }
 
@@ -33,7 +33,7 @@ module "sw_workers" {
 
   hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
-  aws_secret_arn=data.aws_secretsmanager_secret.my_secret.arn
+  aws_secret_arn=aws_secretsmanager_secret.rss_engine_imatia.arn
   ami_id=data.aws_ami.ubuntu_latest.id
 
   depends_on=[module.sw_server,aws_secretsmanager_secret_version.rss_engine_imatia_version]
@@ -58,7 +58,7 @@ module "elastic" {
 
   hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
-  aws_secret_arn=data.aws_secretsmanager_secret.my_secret.arn
+  aws_secret_arn=aws_secretsmanager_secret.rss_engine_imatia.arn
   ami_id=data.aws_ami.ubuntu_latest.id
   subnet_ids=data.aws_subnets.private_subnets.ids
 
@@ -104,7 +104,7 @@ module "grafana" {
   hosted_zone_arn = data.aws_route53_zone.my_hosted_zone.arn
   hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
   environment = var.environment
-  aws_secret_arn = data.aws_secretsmanager_secret.my_secret.arn
+  aws_secret_arn = aws_secretsmanager_secret.rss_engine_imatia.arn
   depends_on=[aws_efs_mount_target.this]
   sg_default_id=data.aws_security_group.default.id
   efs_id=aws_efs_file_system.this.dns_name
