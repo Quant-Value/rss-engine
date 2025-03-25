@@ -227,8 +227,8 @@ echo ${secret_name} > /etc/secret_name
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
 sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
---network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} -e ENVIRON=${environment} -e SECRET_NAME=$(cat /etc/secret_name) \
---privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml  "
+--network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} -e ENVIRON=${environment}  \
+--privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml -e SECRET_NAME=$(cat /etc/secret_name) "
 
 log_message "FIN"
 

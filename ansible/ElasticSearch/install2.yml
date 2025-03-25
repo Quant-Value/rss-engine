@@ -15,6 +15,7 @@
     - name: Define ENVIRON variable
       set_fact:
         ENVIRON: "{{ lookup('env', 'ENVIRON') | default('demo') }}"
+        
     - name: Retrieve secret from AWS Secrets Manager
       command: >
         aws secretsmanager get-secret-value --secret-id {{SECRET_NAME}} --query SecretString --output text
