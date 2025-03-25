@@ -20,17 +20,18 @@ aws s3 cp "$URL" - | gunzip | grep -E '^\{\"Container' | jq '.Envelope.["Payload
 
 
 #cat "$archivo_temp" | grep "http*" |  
-#urls_json=$(cat "$archivo_temp" | grep "http*" | jq -R . | jq -s '{urls: .}')
+urls_json=$(cat "$archivo_temp" | grep "http*" | jq -R . | jq -s '{urls: .}')
 
-urls_json_p=$(cat "$archivo_temp" | grep "http*" | head -n 10 | jq -R . | jq -s '{urls: .}') && echo "$urls_json_p"  > output.json
+#urls_json_p=$(cat "$archivo_temp" | grep "http*" | head -n 10 | jq -R . | jq -s '{urls: .}') && echo "$urls_json_p"  > output.json
+
 #formato esperado {"urls": ["",""]}
 
 rm "$archivo_temp"
 
 archivo_temp2=$(mktemp)
 
-#echo "$urls_json" > $archivo_temp2
-echo "$urls_json_p" > $archivo_temp2
+echo "$urls_json" > $archivo_temp2
+#echo "$urls_json_p" > $archivo_temp2
 
 ./process_rss_batch.sh "$archivo_temp2"
 
