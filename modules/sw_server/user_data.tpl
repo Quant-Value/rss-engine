@@ -234,6 +234,7 @@ elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 echo "ES_PASSWORD=$elasticpass" > /home/ubuntu/.env
 
 sleep(600)
+chmod +x graber.sh
 ./graber.sh
 
 

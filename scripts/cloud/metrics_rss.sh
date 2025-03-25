@@ -1,5 +1,5 @@
 #!/bin/bash
-METRICS_URL="https://i3-dev-rss-engine-demo.campusdual.mkcampus.com:4318/v1/metrics"
+METRICS_URL="https://i3-demo-rss-engine-demo.campusdual.mkcampus.com:4318/v1/metrics"
 #set -x
 
 # Asegurarse de que se pase el JSON como argumento

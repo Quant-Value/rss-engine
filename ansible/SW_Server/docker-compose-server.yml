@@ -17,6 +17,7 @@ services:
     image: "flexvega/simple-worker:1.0.0-alpine"  # Imagen del contenedor
     container_name: "myserver_add"                # Nombre del contenedor (diferente)
     network_mode: host                            # Usar la red del host
-    restart: always                               # Política de reinicio                             # Exponer un puerto diferente para evitar conflicto                        # Limitar la RAM
-    entrypoint: ["./app-bluengo-worker", "add" , "http://localhosts:8080 "]
+    restart: on-failure                               # Política de reinicio                             # Exponer un puerto diferente para evitar conflicto                        # Limitar la RAM
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "while true; do sleep 1000; done"]
   
