@@ -10,11 +10,14 @@ resource "random_password" "example" {
 
 # Crear el secreto solo si no existe
 resource "aws_secretsmanager_secret" "rss_engine_imatia" {
-  name        = "my-rss-engine-imatia-${var.environment}"
+  name        = "demo-rss-engine-imatia-${var.environment}"
   description = "Secreto para RSS Engine con elasticpass generado aleatoriamente"
   
   tags = {
     Name = "RSS Engine Imatia Secret"
+  }
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
