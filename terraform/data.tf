@@ -65,3 +65,6 @@ locals {
   num_availability_zones = length(data.aws_availability_zones.available.names) 
 }
 
+data "aws_secretsmanager_secret" "rss_engine_imatia" {
+  name = "demo-rss-engine-imatia-${var.environment}"
+}

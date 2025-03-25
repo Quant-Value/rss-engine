@@ -9,9 +9,7 @@ resource "random_password" "example" {
 
 
 # Crear el secreto solo si no existe
-data "aws_secretsmanager_secret" "rss_engine_imatia" {
-  name = "demo-rss-engine-imatia-${var.environment}"
-}
+
 # Crear la versión del secreto con el par clave-valor
 resource "aws_secretsmanager_secret_version" "rss_engine_imatia_version" {
   secret_id     = data.aws_secretsmanager_secret.rss_engine_imatia.id 
