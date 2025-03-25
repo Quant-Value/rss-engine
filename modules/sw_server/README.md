@@ -43,7 +43,7 @@ To use this module, define the required variables in your Terraform configuratio
 
 ## Module Invocation
 
-Para invocar este módulo en tu configuración de Terraform, utiliza el siguiente bloque de código:
+To invoke this module in your Terraform configuration, use the following block of code:
 
 ```terraform
 module "sw_server" {
@@ -105,23 +105,3 @@ The `user_data.tpl` script configures the EC2 instance on startup. It performs t
 * **`myserver`**: Runs the `flexvega/simple-worker:1.0.0-alpine` image as a server. It uses the host's network, restarts always, exposes port 8080, and limits CPU and memory resources.
 * **`myserver_add`**: Runs the same image for additional tasks. It also uses the host's network, restarts on failure, and is configured to run indefinitely.
 
-## IAM Permissions (`iam.tf`)
-
-The module creates an IAM role (`ec2-docker-role-i8-<environment>`) and policy (`ec2-docker-policy-i8-<environment>`) with the following permissions:
-
-* ECR access for Docker image retrieval.
-* S3 read access.
-* Route 53 permissions for DNS management.
-* Secrets Manager access for secret retrieval.
-* EC2 DescribeInstances permission.
-
-## Security (`sg.tf`)
-
-The module configures a security group (`ec2-security-group-i8-<environment>`) that allows:
-
-* SSH access (port 22) from any IP.
-* Application access (port 8080) from the instance itself.
-* ICMP (ping) from any IP.
-* All outbound traffic.
-
-**Note:** It is recommended to restrict SSH access to specific IP ranges in production environments.
