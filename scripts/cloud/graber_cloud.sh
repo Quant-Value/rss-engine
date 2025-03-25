@@ -8,7 +8,7 @@ ES_USERNAME="elastic"
 INDEX_NAME="feed-items-demo"
 
 echo "Verificando si el índice existe..."
-curl -X PUT "i1-demo-rss-engine-demo.campusdual.mkcampus.com:9200/$INDEX_NAME" \
+curl -X PUT "i00-demo-rss-engine-demo.campusdual.mkcampus.com:9200/$INDEX_NAME" \
     -u "$ES_USERNAME:$ES_PASSWORD" \
     -H "Content-Type: application/json" \
     -d '{
