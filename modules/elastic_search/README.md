@@ -34,6 +34,41 @@ Before using this module, ensure you have the following:
 * **EFS ID:** The ID of the Elastic File System.
 * **Default Security Group ID:** The ID of the default security group.
 
+## Uso
+
+Para utilizar este módulo, necesitas tener Terraform instalado y configurado con tus credenciales de AWS. A continuación, puedes declarar el módulo en tu configuración de Terraform y proporcionar los valores requeridos.
+
+```terraform
+module "elastic" {
+  source = "../modules/elastic_search"
+
+  aws_region=var.aws_region
+  vpc_id=var.vpc_id
+  private_key_path=var.private_key_path
+  public_key_path=var.public_key_path
+  environment=var.environment
+
+  amount= 3
+
+  sg_sw_worker=module.sw_server.sg_id_server #same sg as workers
+
+  num_availability_zones=local.num_availability_zones
+
+  hosted_zone_arn=data.aws_route53_zone.my_hosted_zone.arn
+  hosted_zone_id=data.aws_route53_zone.my_hosted_zone.id
+  aws_secret_arn=data.aws_secretsmanager_secret.my_secret.arn
+  ami_id=data.aws_ami.ubuntu_latest.id
+  subnet_ids=data.aws_subnets.private_subnets.ids
+
+  efs_dns_name=aws_efs_file_system.this.dns_name
+  sg_default_id=data.aws_security_group.default.id
+  sg_grafana=module.grafana.sg_id
+  sg_otel=module.prometheus.i3_sg_id
+
+  depends_on=[module.sw_workers,module.prometheus,module.grafana,aws_efs_mount_target.this]
+
+}
+```
 ## Module Inputs
 
 The module accepts the following variables:
