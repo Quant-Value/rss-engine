@@ -13,7 +13,7 @@ resource "random_integer" "example" {
 resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no puedes directamente vpc y si no se crea en la vpc default
   count           = var.amount
   ami             = var.ami_id
-  instance_type   = "t3.small"
+  instance_type   = "t3.medium"
   subnet_id       = var.subnet_ids[((random_integer.example.result+count.index)%var.num_availability_zones)]
   key_name        = aws_key_pair.key.key_name
   disable_api_stop = false
