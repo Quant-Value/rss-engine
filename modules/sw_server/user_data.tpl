@@ -233,7 +233,7 @@ elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 # Guardar la contraseña en el archivo .env
 echo "ES_PASSWORD=$elasticpass" > /home/ubuntu/.env
 
-sleep 420 # 7 mins
+sleep 360 # 6 mins
 chmod +x /home/ubuntu/graber.sh
 ./home/ubuntu/graber.sh
 
