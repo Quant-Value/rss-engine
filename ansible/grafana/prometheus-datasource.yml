@@ -1,0 +1,17 @@
+apiVersion: 1
+
+# Proveer el datasource de Prometheus
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://i3-demo-rss-engine-demo.campusdual.mkcampus.com:9090  # URL de tu instancia de Prometheus
+    isDefault: true
+    jsonData:
+      httpMethod: GET  # Método de solicitud para Prometheus
+      timeInterval: "10s"  # Intervalo de tiempo mínimo para las consultas
+    secureJsonData:
+      # Puedes configurar credenciales si tu Prometheus las requiere, por ejemplo:
+      # password: <password_encriptado>
+    version: 1
+    editable: true
