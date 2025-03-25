@@ -66,6 +66,7 @@ locals {
 }
 
 data "aws_secretsmanager_secret" "my_secret" {
-  name = "rss-engine-imatia"  # Cambia este nombre por el nombre de tu secreto
+  name = "rss-engine-imatia-${var.environment}"  # Cambia este nombre por el nombre de tu secreto
+  #name = "rss-engine-imatia"
 }
  
