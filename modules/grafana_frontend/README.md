@@ -151,35 +151,11 @@ The module uses a `docker-compose.yml` file to deploy Grafana.  The Docker Compo
   * Exposes port 3000 for accessing the Grafana web interface.
   * Sets the `GF_PATHS_CONFIG` environment variable to point to the custom configuration file.
 
-## Troubleshooting
 
-  * **EC2 Instance Connection Issues:** Verify that the security group allows SSH access from your IP address and that you are using the correct SSH key.
-  * **Grafana Not Accessible:** Ensure that the EC2 instance is running, the security group allows access to port 3000, and that Grafana is running within the Docker container.  Check the Docker logs: `docker logs grafana`.
-  * **DNS Resolution Issues:** Verify that the Route 53 Hosted Zone is correctly configured and that the domain name is properly registered.  Check the output of the `terraform apply` command for any errors related to Route 53.  Also, check that the `update-dns.service` is running on the EC2 instance: `sudo systemctl status update-dns.service`.
-  * **EFS Mount Issues:** Check the system logs on the EC2 instance for any errors related to mounting the EFS volume.  Verify that the EFS volume is in the same region as the EC2 instance.
-  * **Secrets Manager Issues:** Verify that the IAM role has the necessary permissions to access the AWS Secrets Manager secret and that the secret ARN is correct.
-  * **Docker Issues**: If you have problems with docker, connect to the instance using SSH and check the status of the docker service: `sudo systemctl status docker`.  You can also check the docker logs: `sudo journalctl -u docker`.
-  * **DNS Update Service Issues**: If the DNS record is not updating after a reboot, check the status of the `update-dns.service`:
-    ```bash
-    sudo systemctl status update-dns.service
-    ```
-    If the service is not running or has errors, you can try restarting it:
-    ```bash
-    sudo systemctl restart update-dns.service
-    ```
-    You can also check the service logs:
-    ```bash
-    sudo journalctl -u update-dns.service
-    ```
-  * **Grafana Password Issue**: If you are unable to login to Grafana, verify that the secret is stored correctly in AWS Secrets Manager and that the ARN is correctly provided to the module.  You can also SSH into the EC2 instance and check the contents of the `/home/ubuntu/conf/custom.ini` file to verify that the password was correctly written.
 
-## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## License
 
-[MIT](LICENSE)
 
 
 
