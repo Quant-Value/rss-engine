@@ -61,7 +61,7 @@ aws route53 change-resource-record-sets \
                         "Name": "'$record_name'",
                         "Type": "A",
                         "TTL": 300,
-                        "ResourceRecords": [{"Value": "'$public_ip'"}]
+                        "ResourceRecords": [{"Value": "'$private'"}]
                       }
                     }
                   ]
@@ -92,7 +92,7 @@ json=$(cat <<EOT
         "TTL": 300,
         "ResourceRecords": [
           {
-            "Value": "$public_ip"
+            "Value": "$private_ip"
           }
         ]
       }

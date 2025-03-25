@@ -44,14 +44,10 @@ instance_id=$(aws ec2 describe-instances --filters "Name=private-ip-address,Valu
 public_ip=$(aws ec2 describe-instances --instance-ids "$instance_id" --query "Reservations[0].Instances[0].PublicIpAddress" --output text --region eu-west-3)
 
 
-
-
-# Leer los archivos para obtener los valores
-
-
               # Añadir la IP privada al registro de Route 53 (reemplazar los valores según sea necesario)
 zone_id=${zone}  # ID de tu zona de Route 53
 record_name=$(cat /etc/record_name)
+
 aws route53 change-resource-record-sets \
                 --hosted-zone-id $zone_id \
                 --change-batch '{
@@ -62,7 +58,7 @@ aws route53 change-resource-record-sets \
                         "Name": "'$record_name'",
                         "Type": "A",
                         "TTL": 300,
-                        "ResourceRecords": [{"Value": "'$public_ip'"}]
+                        "ResourceRecords": [{"Value": "'$private_ip'"}]
                       }
                     }
                   ]
@@ -93,7 +89,7 @@ json=$(cat <<EOT
         "TTL": 300,
         "ResourceRecords": [
           {
-            "Value": "$public_ip"
+            "Value": "$private_ip"
           }
         ]
       }

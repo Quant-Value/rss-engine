@@ -66,5 +66,5 @@ locals {
 }
 
 data "aws_secretsmanager_secret" "rss_engine_imatia" {
-  name = "demo-rss-engine-imatia-${var.environment}"
+  name = "1-rss-engine-imatia-${var.environment}"
 }
