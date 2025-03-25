@@ -1,27 +1,59 @@
-# Grafana Terraform Module
+# Grafana Deployment Module
 
-This Terraform module automates the creation of a Grafana instance on AWS. It creates an EC2 instance, configures the necessary IAM resources, and deploys Grafana using Docker.
+This module automates the deployment of a Grafana instance on an AWS EC2 instance, configured for use with the i4-rss-engine. It sets up the necessary infrastructure, including the EC2 instance, IAM roles, security groups, and Docker, and configures Grafana to persist data on an EFS volume.  It also configures DNS records using Route53.
 
-## Description
+## Features
 
-The module performs the following actions:
+  * **EC2 Instance Deployment:** Provisions an EC2 instance to host the Grafana server.
+  * **IAM Role and Policy:** Creates an IAM role with the necessary permissions for the EC2 instance to access other AWS services, such as ECR, S3, Route 53, and Secrets Manager.
+  * **Security Group Configuration:** Configures a security group to allow SSH and Grafana (port 3000) access.
+  * **EFS Integration:** Mounts an Amazon EFS volume to the EC2 instance for persistent Grafana data storage.
+  * **Docker Installation:** Installs and configures Docker on the EC2 instance.
+  * **Grafana Deployment:** Deploys Grafana using Docker Compose, with configurations for data persistence and a Prometheus datasource.
+  * **Route 53 Integration**:  Creates or updates a DNS A record in Route 53, pointing to the public IP of the EC2 instance.  This allows for accessing the Grafana instance using a hostname.
+  * **Automatic DNS Update:** Sets up a systemd service to automatically update the Route 53 DNS record whenever the EC2 instance restarts and its public IP address changes.
+  * **Secrets Management:** Retrieves the Grafana admin password from AWS Secrets Manager.
 
-* **Provision an EC2 instance**: Creates an EC2 instance on AWS to host Grafana.
-* **Configure IAM**: Creates an IAM role and instance profile with the necessary permissions for Grafana to interact with other AWS services.
-* **Deploy Grafana with Docker**: Uses Docker to deploy Grafana on the EC2 instance.
-* **Configure Route 53 (optional)**: Updates a Route 53 DNS record to point to the Grafana instance.
-* **Mount an EFS volume (optional)**: Mounts an Elastic File System (EFS) volume for persistent storage of Grafana data.
+## Architecture
 
-## Usage
+The architecture consists of:
 
-To use this module, you need to have Terraform installed and configured with your AWS credentials. You can then declare the module in your Terraform configuration and provide the required values.
+  * An EC2 instance running Ubuntu.
+  * An EFS volume mounted to the EC2 instance for persistent storage.
+  * A Security Group allowing access to the EC2 instance.
+  * IAM Role and Instance Profile.
+  * Route 53 for DNS management.
+  * Docker and Docker Compose.
+  * Grafana.
+  * AWS Secrets Manager
 
-Here's an example of how to use this module to deploy Grafana:
+## Prerequisites
 
-```terraform
-module "grafana" {
-    source = "./modules/grafana_frontend"
-    
+Before using this module, ensure you have the following:
+
+  * An AWS account.
+  * An existing VPC, Subnets, and Security Groups.
+  * A registered domain and a Hosted Zone in Route 53.
+  * An SSH key pair for accessing the EC2 instance.
+  * The AMI ID for the EC2 instance.
+  * The ARN of the hosted zone.
+  * The ID of the hosted zone.
+  * The ARN of the AWS Secret containing the Grafana admin password.
+  * The DNS name of the EFS volume.
+
+## Getting Started
+
+### Use
+
+
+  **Define variables:**
+    Create a `terraform.tfvars` file or set the following variables in your Terraform configuration:
+
+  **How to call the module:**
+  ```terraform
+  module "grafana" {
+    source = "../modules/grafana_frontend"
+  
     vpc_id = var.vpc_id
     public_key_path= var.public_key_path
 
@@ -34,43 +66,122 @@ module "grafana" {
     hosted_zone_arn = data.aws_route53_zone.my_hosted_zone.arn
     hosted_zone_id = data.aws_route53_zone.my_hosted_zone.id
     environment = var.environment
-    aws_secret_arn = data.aws_secretsmanager_secret.my_secret.arn
+    aws_secret_arn = aws_secretsmanager_secret.rss_engine_imatia.arn
     depends_on=[aws_efs_mount_target.this]
     sg_default_id=data.aws_security_group.default.id
     efs_id=aws_efs_file_system.this.dns_name
+
+    aws_key_name=aws_key_pair.key_ec2.key_name
 }
 ```
 
-## Variables
 
-The module defines the following variables:
+## Inputs
 
-|  | **Name** | **Description** | **Type** | **Default** | **Required** |
-| --- | --- | --- | --- | --- | --- |
-|  | `ami_id` | The ID of the Amazon Machine Image (AMI) to use for the EC2 instance. | `string` | N/A | Yes |
-|  | `subnet_ids` | A list of subnet IDs where the EC2 instance will be launched. | `list(string)` | N/A | Yes |
-|  | `environment` | The environment in which Grafana will be deployed (e.g., production, staging, development). Used for resource tagging. | `string` | N/A | Yes |
-|  | `region` | The AWS region where resources will be created. | `string` | N/A | Yes |
-|  | `hosted_zone_id` | (Optional) The ID of the Route 53 hosted zone where the DNS record will be created. If provided, the module will create an A record pointing to the EC2 instance. | `string` | `""` | No |
-|  | `efs_id` | (Optional) The ID of the Elastic File System (EFS) file system to mount on the EC2 instance for persistent data storage. | `string` | `""` | No |
-|  | `public_key_path` | (Optional) The path to the SSH public key to use for accessing the EC2 instance. | `string` | `~/.ssh/id_rsa.pub` | No |
-|  | `sg_default_id` | (Optional) The ID of the default security group for the VPC. | `string` | `""` | No |
-|  | `aws_secret_arn` | (Optional) The ARN of the AWS Secrets Manager secret containing the ElasticSearch credentials. | `string` | `""` | No |
+| Name                 | Description                                                                                                  | Type           | Default                | Required |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ | -------------- | ---------------------- | -------- |
+| `ami_id`             | The AMI ID to use for the EC2 instance.                                                                      | `string`       | n/a                    | Yes      |
+| `aws_secret_arn`     | ARN of the AWS Secrets Manager secret containing the Grafana admin password.                                    | `string`       | n/a                    | Yes      |
+| `environment`        | Environment (e.g., `dev`, `prod`).                                                                           | `string`       | n/a                    | Yes      |
+| `efs_id`             | The DNS name of the EFS volume.                                                                                | `string`       | n/a                    | Yes      |
+| `hosted_zone_arn`    | ARN of the Route 53 Hosted Zone.                                                                               | `string`       | n/a                    | Yes      |
+| `hosted_zone_id`     | ID of the Route 53 Hosted Zone.                                                                                | `string`       | n/a                    | Yes      |
+| `num_availability_zones`| Number of Availability Zones to use.                                                                         | `number`       | n/a                    | No       |
+| `public_key_path`    | Path to the SSH public key file associated with the private key for accessing the EC2 instances.               | `string`       | `../../my-ec2-key.pub` | No       |
+| `sg_default_id`      | Security Group  to assign to the instance                                                                       | `string`       | n/a                    | Yes      |
+| `subnet_ids`         | List of IDs of the subnets where the EC2 instance will be launched.                                            | `list(string)` | n/a                    | Yes      |
+| `vpc_id`             | ID of the VPC where the EC2 instance will be launched.                                                           | `string`       | n/a                    | Yes      |
+| `hosted_zone`        | The name of the hosted zone.                                                                                 | `string`       | n/a                    | Yes      |
 
 ## Outputs
 
-The module defines the following outputs:
+| Name                 | Description                               |
+| -------------------- | ----------------------------------------- |
+| `instance_public_ip` | The public IP address of the EC2 instance. |
+| `instance_private_ip`| The private IP address of the EC2 instance. |
+| `sg_id`              | The ID of the security group created.     |
 
-|  | **Name** | **Description** |
-| --- | --- | --- |
-|  | `instance_public_ip` | The public IP address of the Grafana EC2 instance. |
-|  | `instance_private_ip` | The private IP address of the Grafana EC2 instance. |
-|  | `sg_id` | The ID of the security group created for the Grafana instance. |
+## User Data
 
-## Dependencies
+The `user_data.tpl` template configures the EC2 instance on startup.  Here's a breakdown of the actions performed:
 
-* Terraform
-* AWS provider for Terraform
+  * System updates and dependency installation (unzip, curl, nfs-common, git, python3-pip).
+  * Hostname configuration.
+  * EFS volume mounting and persistent mount configuration via `/etc/fstab`.
+  * AWS CLI installation.
+  * Docker installation and startup.
+  * Adds the `ubuntu` user to the `docker` group.
+  * Retrieves the instance ID and public IP.
+  * Configures a Route 53 A record with the instance's public IP.
+  * Creates a systemd service (`update-dns.service`) to keep the Route 53 record updated on reboot.
+  * Clones the Grafana Docker Compose file from GitHub.
+  * Retrieves the Grafana admin password from AWS Secrets Manager.
+  * Configures Grafana's `custom.ini` with the admin password.
+  * Configures the Prometheus datasource for Grafana.
+  * Starts Grafana using Docker Compose.
+
+## IAM Permissions
+
+The module creates an IAM role (`ec2-docker-role-i4`) and policy (`ec2-docker-policy-i4`) with the following permissions:
+
+  * `ecr:GetAuthorizationToken`, `ecr:BatchCheckLayerAvailability`, `ecr:GetDownloadUrlForLayer`, `ecr:BatchGetImage`:  For pulling Docker images from ECR.
+  * `s3:*`:  For access to S3 buckets.
+  * `route53:ChangeResourceRecordSets`, `route53:ListResourceRecordSets`: For managing DNS records in Route 53.
+  * `ec2:DescribeInstances`: For retrieving EC2 instance information.
+  * `secretsmanager:GetSecretValue`: For retrieving the Grafana admin password from AWS Secrets Manager.
+
+## Security
+
+  * The module creates a security group (`i4-ec2-security-group`) that allows SSH access (port 22) and Grafana access (port 3000) from any IP address (`0.0.0.0/0`).  **It is highly recommended to restrict access to specific IP addresses or CIDR blocks in a production environment.**
+  * The Grafana admin password is retrieved from AWS Secrets Manager, enhancing security.
+  * EFS volume is mounted with specific user and group ownership (1000:1000).
+
+## DNS Configuration
+
+The module uses Route 53 to manage DNS records. It creates or updates an A record for the EC2 instance, mapping a hostname (e.g., `i4-dev-rss-engine-demo.campusdual.mkcampus.com`) to the instance's public IP address.  A systemd service is also configured to update this record automatically on instance restarts.
+
+## Docker Compose
+
+The module uses a `docker-compose.yml` file to deploy Grafana.  The Docker Compose configuration:
+
+  * Uses the `grafana/grafana:11.5.2-ubuntu` image.
+  * Mounts the EFS volume to `/grafana` for persistent data storage.
+  * Mounts the `custom.ini` configuration file to `/config`.
+  * Mounts the Prometheus datasource configuration to `/etc/grafana/provisioning/datasources`.
+  * Exposes port 3000 for accessing the Grafana web interface.
+  * Sets the `GF_PATHS_CONFIG` environment variable to point to the custom configuration file.
+
+## Troubleshooting
+
+  * **EC2 Instance Connection Issues:** Verify that the security group allows SSH access from your IP address and that you are using the correct SSH key.
+  * **Grafana Not Accessible:** Ensure that the EC2 instance is running, the security group allows access to port 3000, and that Grafana is running within the Docker container.  Check the Docker logs: `docker logs grafana`.
+  * **DNS Resolution Issues:** Verify that the Route 53 Hosted Zone is correctly configured and that the domain name is properly registered.  Check the output of the `terraform apply` command for any errors related to Route 53.  Also, check that the `update-dns.service` is running on the EC2 instance: `sudo systemctl status update-dns.service`.
+  * **EFS Mount Issues:** Check the system logs on the EC2 instance for any errors related to mounting the EFS volume.  Verify that the EFS volume is in the same region as the EC2 instance.
+  * **Secrets Manager Issues:** Verify that the IAM role has the necessary permissions to access the AWS Secrets Manager secret and that the secret ARN is correct.
+  * **Docker Issues**: If you have problems with docker, connect to the instance using SSH and check the status of the docker service: `sudo systemctl status docker`.  You can also check the docker logs: `sudo journalctl -u docker`.
+  * **DNS Update Service Issues**: If the DNS record is not updating after a reboot, check the status of the `update-dns.service`:
+    ```bash
+    sudo systemctl status update-dns.service
+    ```
+    If the service is not running or has errors, you can try restarting it:
+    ```bash
+    sudo systemctl restart update-dns.service
+    ```
+    You can also check the service logs:
+    ```bash
+    sudo journalctl -u update-dns.service
+    ```
+  * **Grafana Password Issue**: If you are unable to login to Grafana, verify that the secret is stored correctly in AWS Secrets Manager and that the ARN is correctly provided to the module.  You can also SSH into the EC2 instance and check the contents of the `/home/ubuntu/conf/custom.ini` file to verify that the password was correctly written.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+[MIT](LICENSE)
+
+
 
 
 
