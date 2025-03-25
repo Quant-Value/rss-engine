@@ -221,8 +221,9 @@ done
 docker compose -f /home/ubuntu/docker-compose.yml up -d
 
 curl -o /home/ubuntu/graber.sh https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/graber_cloud.sh
-curl -o /home/ubuntu/app https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/app
-chmod +x /home/ubuntu/graber.sh /home/ubuntu/app
+#curl -o /home/ubuntu/app https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/scripts/cloud/app
+chmod +x /home/ubuntu/graber.sh 
+#/home/ubuntu/app
 
 # Obtener el valor secreto desde AWS Secrets Manager
 secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text)
@@ -233,7 +234,7 @@ elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')
 # Guardar la contraseña en el archivo .env
 echo "ES_PASSWORD=$elasticpass" > /home/ubuntu/.env
 
-sleep(600)
+sleep 420 # 7 mins
 chmod +x graber.sh
 ./graber.sh
 
