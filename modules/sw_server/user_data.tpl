@@ -224,7 +224,8 @@ chmod +x /home/ubuntu/graber.sh
 #/home/ubuntu/app
 
 # Obtener el valor secreto desde AWS Secrets Manager
-secret_value=$(aws secretsmanager get-secret-value --secret-id "rss-engine-imatia" --query SecretString --output text)
+echo ${secret_name} > /etc/secret_name
+secret_value=$(aws secretsmanager get-secret-value --secret-id $(cat /etc/secret_name) --query SecretString --output text)
 
 # Extraer el campo 'elasticpass' del JSON del secreto
 elasticpass=$(echo "$secret_value" | jq -r '.elasticpass')

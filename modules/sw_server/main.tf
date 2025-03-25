@@ -26,6 +26,7 @@ resource "aws_instance" "ec2_instance_i8" {
     instance_id = "i8-${var.environment}"
     record_name = "i8-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
     zone=var.hosted_zone_id
+    secret_name=var.secret_name
   })
 
   depends_on = [aws_security_group.sg_server]

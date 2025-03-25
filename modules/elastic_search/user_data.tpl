@@ -222,10 +222,12 @@ wait_for_dns_resolution "$dns_name" "$port"
 
 
 log_message "Ya solo falta ejecutar los playbooks"
+echo ${secret_name} > /etc/secret_name
+
 
 # 4. Ejecutar el playbook de Ansible dentro de un contenedor Docker
 sudo docker run --rm -v /home/ubuntu:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
---network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} -e ENVIRON=${environment} \
+--network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" -e NUM_NODES=${cantidad} -e INDEX=${index} -e ENVIRON=${environment} -e SECRET_NAME=$(cat /etc/secret_name) \
 --privileged --name ansible-playbook-container --entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml  "
 
 log_message "FIN"

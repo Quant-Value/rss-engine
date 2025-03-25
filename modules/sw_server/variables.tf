@@ -60,3 +60,6 @@ variable "aws_secret_arn" {
 variable "aws_key_name"{
   type = string
 }
+variable "secret_name"{
+  type=string
+}

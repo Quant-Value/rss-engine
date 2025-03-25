@@ -240,11 +240,12 @@ curl -o /home/ubuntu/play/docker-compose.yml.j2 https://raw.githubusercontent.co
 curl -o /home/ubuntu/play/install2.yml  https://raw.githubusercontent.com/campusdualdevopsGrupo2/imatia-rss-engine/refs/heads/main/ansible/SW_Worker/set_workers.yml 
 
 log_message "start playbooks"
+echo ${secret_name} > /etc/secret_name
 
 sudo docker run --rm -v /home/ubuntu/play:/ansible/playbooks -v /home/ubuntu/.ssh:/root/.ssh \
 --network host -e ANSIBLE_HOST_KEY_CHECKING=False -e ANSIBLE_SSH_ARGS="-o StrictHostKeyChecking=no" \
 --privileged --name ansible-playbook-container \
---entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml -e DNS_SERVER=$(cat /etc/dns_name) -e ENVIRON=${environment} "
+--entrypoint "/bin/bash" ansible-local  -c "ansible-playbook -i /ansible/playbooks/hosts.ini /ansible/playbooks/install2.yml -e DNS_SERVER=$(cat /etc/dns_name) -e ENVIRON=${environment} -e SECRET_NAME=$(cat /etc/secret_name) "
 
 log_message "end"
 

@@ -26,3 +26,6 @@ variable "public_key_path" {
   description = "Ruta al archivo de la clave pública SSH asociada a la clave privada para acceder a las instancias EC2."
   type        = string
 }
+variable "secret_name"{
+  type=string
+}
