@@ -20,7 +20,7 @@ resource "aws_instance" "elasticsearch_nodes" {
   tags = {
     Name = "Grupo2-elastic-instance-es-${count.index + 1}-${var.environment}",
     Grupo="g2",
-    DNS_NAME="i${count.index}-rss-engine-demo"
+    DNS_NAME="i0${count.index}-rss-engine-demo"
   }
 
   user_data = templatefile("${path.module}/user_data.tpl", {

@@ -16,9 +16,9 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   disable_api_stop = false
 
   tags = {
-    Name  = "i${count.index + 5} SW worker Grupo2 ${var.environment}"
+    Name  = "i5${count.index + 5} SW worker Grupo2 ${var.environment}"
     Grupo = "g2"
-    DNS_NAME="i${count.index + 5}-rss-engine-demo"
+    DNS_NAME="i5${count.index + 5}-rss-engine-demo"
   }
 
   vpc_security_group_ids = [var.sg_group_server]
@@ -26,8 +26,8 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   iam_instance_profile = aws_iam_instance_profile.ec2_role_i5.name
 
   user_data = templatefile("${path.module}/user_data.tpl", {
-    instance_id = "i${count.index + 5}-${var.environment}"
-    record_name = "i${count.index + 5}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
+    instance_id = "i5${count.index + 5}-${var.environment}"
+    record_name = "i5${count.index + 5}-${var.environment}-rss-engine-demo.campusdual.mkcampus.com" 
     zone=var.hosted_zone_id
     environment= var.environment
     sw_server_dns_name=var.dns_name_server #cambiar esto por un output

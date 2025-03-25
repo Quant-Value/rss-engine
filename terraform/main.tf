@@ -14,7 +14,7 @@ module "sw_server" {
   aws_secret_arn=aws_secretsmanager_secret.rss_engine_imatia.arn
   ami_id=data.aws_ami.ubuntu_latest.id
 
-  aws_key_name=aws_key_pair.key.name
+  aws_key_name=aws_key_pair.key_ec2.key_name
 }
 
 module "sw_workers" {
@@ -38,7 +38,7 @@ module "sw_workers" {
   aws_secret_arn=aws_secretsmanager_secret.rss_engine_imatia.arn
   ami_id=data.aws_ami.ubuntu_latest.id
 
-  aws_key_name=aws_key_pair.key.name
+  aws_key_name=aws_key_pair.key_ec2.key_name
 
   depends_on=[module.sw_server,aws_secretsmanager_secret_version.rss_engine_imatia_version]
 
@@ -71,7 +71,7 @@ module "elastic" {
   sg_grafana=module.grafana.sg_id
   sg_otel=module.prometheus.i3_sg_id
 
-  aws_key_name=aws_key_pair.key.name
+  aws_key_name=aws_key_pair.key_ec2.key_name
 
   
   depends_on=[module.sw_workers,module.prometheus,module.grafana,aws_efs_mount_target.this]
@@ -93,7 +93,7 @@ module "prometheus" {
   sg_default_id=data.aws_security_group.default.id
   sg_grafana=module.grafana.sg_id
 
-  aws_key_name=aws_key_pair.key.name
+  aws_key_name=aws_key_pair.key_ec2.key_name
 
   depends_on=[module.sw_workers,aws_efs_mount_target.this]
 }
@@ -118,5 +118,5 @@ module "grafana" {
   sg_default_id=data.aws_security_group.default.id
   efs_id=aws_efs_file_system.this.dns_name
 
-  aws_key_name=aws_key_pair.key.name
+  aws_key_name=aws_key_pair.key_ec2.key_name
 }
