@@ -77,7 +77,7 @@ module "elastic" {
   aws_key_name=aws_key_pair.key_ec2.key_name
 
   
-  depends_on=[module.sw_workers,module.prometheus,module.grafana,aws_efs_mount_target.this]
+  depends_on=[module.sw_workers,module.prometheus,module.grafana]
 
 }
 
@@ -98,7 +98,7 @@ module "prometheus" {
 
   aws_key_name=aws_key_pair.key_ec2.key_name
 
-  depends_on=[module.sw_workers,aws_efs_mount_target.this]
+  depends_on=[module.sw_workers]
 }
 
 module "grafana" {
