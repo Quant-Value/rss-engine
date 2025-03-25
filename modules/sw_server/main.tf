@@ -1,14 +1,9 @@
 
-resource "aws_key_pair" "key_pair" {
-  key_name   = "i8-key-g2-${var.environment}"
-  public_key = file(var.public_key_path)
-}
-
 
 resource "aws_instance" "ec2_instance_i8" {
   ami           = var.ami_id
   instance_type = "t3.medium"
-  key_name      = aws_key_pair.key_pair.key_name
+  key_name      = var.aws_key_name
   subnet_id       = var.subnet_ids[0]
   disable_api_stop = false
 

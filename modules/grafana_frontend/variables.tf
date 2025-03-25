@@ -66,3 +66,6 @@ variable "efs_id"{
 variable "sg_default_id"{
   type=string
 }
+variable "aws_key_name"{
+  type = string
+}

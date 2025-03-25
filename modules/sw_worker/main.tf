@@ -1,8 +1,5 @@
 
-resource "aws_key_pair" "key" {
-  key_name   = "i5-key-g2-${var.environment}"
-  public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
-}
+
 
 resource "random_integer" "example" {
   min = 1   # The minimum value (inclusive)
@@ -15,7 +12,7 @@ resource "aws_instance" "ec2_instance_wk" {#hay que especificar subnet porque no
   ami             = var.ami_id
   instance_type   = "t3.medium"
   subnet_id       = var.subnet_ids[((random_integer.example.result+count.index)%var.num_availability_zones)]
-  key_name        = aws_key_pair.key.key_name
+  key_name        = var.aws_key_name
   disable_api_stop = false
 
   tags = {

@@ -65,4 +65,6 @@ variable "sg_wk" {
 variable "sg_grafana" {
   type = string
 }
- 
+variable "aws_key_name"{
+  type = string
+}

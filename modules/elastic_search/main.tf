@@ -1,18 +1,11 @@
 
 
-resource "aws_key_pair" "key" {
-  key_name   = "my-key-ES-${var.environment}"
-  public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
-}
-
-
-
 resource "aws_instance" "elasticsearch_nodes" {
   count           = var.amount  # Número de instancias EC2 que deseas lanzar
   ami             = var.ami_id
   instance_type   = "t3.large"
   subnet_id       = var.subnet_ids[(count.index % var.num_availability_zones)]
-  key_name        = aws_key_pair.key.key_name
+  key_name        = var.aws_key_name
   disable_api_stop = false
 
   iam_instance_profile = aws_iam_instance_profile.ec2_role_i0.name

@@ -57,3 +57,6 @@ variable "aws_secret_arn" {
   description = "arn from secret"
 
 }
+variable "aws_key_name"{
+  type = string
+}

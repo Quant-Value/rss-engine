@@ -1,7 +1,3 @@
-resource "aws_key_pair" "key" {
-  key_name   = "my-key-i3-${var.environment}"
-  public_key = file(var.public_key_path)  # Ruta de tu clave pública en tu máquina local
-}
 
 
 resource "aws_instance" "ec2_node" {
@@ -9,7 +5,7 @@ resource "aws_instance" "ec2_node" {
   ami             = var.ami_id
   instance_type   = "t3.medium"
   subnet_id       = var.subnet_ids[0]
-  key_name        = aws_key_pair.key.key_name
+  key_name        = var.aws_key_name
   disable_api_stop = false
   
   # Asignar un rol a la instancia para acceder a ECR

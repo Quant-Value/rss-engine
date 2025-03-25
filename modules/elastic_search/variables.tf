@@ -85,3 +85,6 @@ variable "sg_grafana"{
 variable "sg_otel"{
     type= string
 }
+variable "aws_key_name"{
+  type = string
+}
