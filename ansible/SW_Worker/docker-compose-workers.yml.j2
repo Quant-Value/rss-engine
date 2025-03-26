@@ -16,4 +16,4 @@ services:
     restart: unless-stopped  # Para reiniciar el contenedor si falla
     working_dir: /app  
     entrypoint: ["./app-bluengo-worker", "worker"]
-    command: -server http://{{ DNS_SERVER }}:8080 -slots=3
+    command: -server http://{{ DNS_SERVER }}:8080 -slots=1
