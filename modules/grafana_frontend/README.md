@@ -69,7 +69,7 @@ Before using this module, ensure you have the following:
     aws_secret_arn = aws_secretsmanager_secret.rss_engine_imatia.arn
     depends_on=[aws_efs_mount_target.this]
     sg_default_id=data.aws_security_group.default.id
-    efs_id=aws_efs_file_system.this.dns_name
+    efs_id=var.efs_dns_name
 
     aws_key_name=aws_key_pair.key_ec2.key_name
 }

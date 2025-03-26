@@ -49,10 +49,9 @@ module "prometheus" {
   hosted_zone_id     = data.aws_route53_zone.my_hosted_zone.id
   ami_id             = data.aws_ami.ubuntu_latest.id
   subnet_ids         = data.aws_subnets.private_subnets.ids
-  efs_id             = aws_efs_file_system.this.dns_name
+  efs_id             = var.efs_dns_name
   sg_default_id      = data.aws_security_group.default.id
   sg_grafana         = module.grafana.sg_id
-  depends_on         = [module.sw_workers]
 }
 ```
 

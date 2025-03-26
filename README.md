@@ -1,3 +1,53 @@
-# imatia-rss-engine
+# Imatia-rss-engine
 
-There is a secret generated previously
+This repository contains Terraform configurations for deploying the RSS Engine infrastructure on AWS. It includes modules for setting up the server, workers, Elasticsearch, Prometheus, and Grafana.
+
+## Project Structure
+-   [`terraform/`](./terraform/README.md):This directory contains the primary Terraform configuration files that orchestrate and call the various modules required for the deployment.
+    -   `main.tf`: Main Terraform configuration file that orchestrates the deployment using various modules.
+    -   `key.tf`: Configuration for creating the AWS key pair for EC2 instances.
+    -   `data.tf`: Data sources to fetch existing AWS resources like VPCs, subnets, and security groups.
+    -   `backend.tf`: Configuration for the Terraform backend using S3.
+    -   `secret.tf`: Configuration for generating random passwords and storing as secrets in AWS Secrets Manager (The secrets are already generated in this particular case).
+    -   `terraform.tfvars`: Variable values for the Terraform deployment.
+    -   `variables.tf`: Variable definitions for the Terraform deployment.
+-   `modules/`: Directory containing reusable Terraform modules:
+    -   [`sw_server/`](./modules/sw_server/README.md): Module for deploying the SW Server.
+    -   [`sw_worker/`](./modules/sw_worker/README.md): Module for deploying the SW Workers.
+    -   [`elastic_search/`](./modules/elastic_search/README.md): Module for deploying Elasticsearch.
+    -   [`prometheus_opentelemetry/`](./modules/prometheus_opentelemetry/README.md): Module for deploying Prometheus and OpenTelemetry.
+    -   [`grafana_frontend/`](./modules/grafana_frontend/README.md): Module for deploying Grafana.
+-   `scripts/`: Directory containing supporting scripts:
+    -   [`cloud/`](./scripts/cloud/README.md): Directory containing scripts for SW_server and SW_worker
+        -   `graber_cloud.sh`: Script to download and process data from an S3 bucket and send it to an RSS worker.
+        -   `job.sh`: Script to process WARC.WAT files and extract RSS URLs.
+        -   `metrics_rss.sh`: Script to process and send metrics in JSON format.
+        -   `process_rss_batch.sh`: Script to process RSS feed URLs and send data to Elasticsearch.
+    -   [`Prometheus`](./scripts/Prometheus/README.md): Directory containing a script that generates random passwords
+        -   `Hash.py`: Python script to generate and hash a password for Prometheus Basic Authentication.
+-   [`dockerfiles/`](./dockerfiles/README.md): Directory containing Dockerfiles for building Docker images:
+    -   `Dockerfile.ansible`: Dockerfile for building an Ansible environment.
+    -   `Dockerfile.elastic`: Dockerfile for building an Elasticsearch image that grants sudo privileges to the user 'elasticsearch'.
+    -   `Dockerfile.prometheus`: Dockerfile for building a Prometheus image that grants sudo privileges to the user 'ubuntu'.
+    -   `Dockerfile.worker.alpine`: Dockerfile for building a worker application image based on Alpine.
+-   `ansible/`: This directory contains the playbooks and Docker Compose files required by the modules for automated configuration and orchestration.
+    -   `ElasticSearch`:Directory containing Ansible configurations for Elasticsearch:
+        -   `docker-compose.yml.j2`: Jinja2 template for Docker Compose configuration of Elasticsearch.
+        -   `install2.yml`: Ansible playbook for configuring Elasticsearch nodes dynamically.
+    -   [`frontend/`](./ansible/frontend/README.md)
+        -   `public-html/`: Direcory containing index.php.
+            -   `index.php`:frontend.
+        -   `Dockerfile`: Dockerfile for building an Apache image for frontend.
+    -   `grafana/`
+        -   `docker-compose.yml`:Docker Compose configuration to deploy Grafana.
+    -   `Otel-Prometheus/`:Contains the files needed to deploy Prometheus and OpenTelemetry.
+        -   `config/`: Contains configuration files for Prometheus and OpenTelemetry.
+            -   `otel-collector-config.yml`:Configuration file for the OpenTelemetry Collector.
+            -   `prometheus.yml`:Configuration file for Prometheus.
+        -   `docker-compose.yml`:Docker Compose configuration to deploy Prometheus and OpenTelemetry.
+    -   `SW_Server/`:Contains the files needed to deploy the SW_Server.
+        -   `docker-compose.yml`:Docker Compose configuration to deploy the SW_Server.
+    -   `SW_Worker/`:Contains the files needed to deploy the Workers.
+        -   `docker-compose.yml.j2`: Jinja2 template for Docker Compose configuration of the workers.
+        -   `set_workers.yml`:Ansible playbook to configure the workers.
+    -   `install.yml`:Ansible playbooy for installing docker and basic components.
