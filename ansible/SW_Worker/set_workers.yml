@@ -81,6 +81,5 @@
       command: "sudo docker exec {{ container_id.stdout }} chmod +x /app/scripts/{{ item }}"
       loop:
         - job.sh
-        - upload.sh
         - process_rss_batch.sh
         - metrics_rss.sh
