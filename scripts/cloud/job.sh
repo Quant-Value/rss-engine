@@ -12,7 +12,7 @@ BASE_URL="s3://commoncrawl/"
 
 # Concatenar la URL base con el argumento pasado
 URL="${BASE_URL}${1}"
-
+sleep 50
 echo "Descargando y procesando el archivo desde $URL..."
 
 # Descargar y procesar el archivo directamente sin archivos temporales
