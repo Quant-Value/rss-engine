@@ -6,6 +6,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 #crawl-data/CC-MAIN-2025-05/segments/1736703701202.99/wat/CC-MAIN-20250126103503-20250126133503-00899.warc.wat.gz
+#s3://commoncrawl/crawl-data/CC-MAIN-2025-05/segments/1736703701202.99/wat/CC-MAIN-20250126103503-20250126133503-00899.warc.wat.gz
 # URL base de S3
 BASE_URL="s3://commoncrawl/"
 
@@ -14,25 +15,18 @@ URL="${BASE_URL}${1}"
 
 echo "Descargando y procesando el archivo desde $URL..."
 
-archivo_temp=$(mktemp)
-# Descargar el archivo desde S3 y descomprimirlo en una variable
-aws s3 cp "$URL" - | gunzip | grep -E '^\{\"Container' | jq '.Envelope.["Payload-Metadata"].["HTTP-Response-Metadata"].["HTML-Metadata"].["Head"].Link, .Links' | grep -vx "null" | jq .[] | jq -r 'select(.type == "application/rss+xml") | .url' > "$archivo_temp"
+# Descargar y procesar el archivo directamente sin archivos temporales
+urls_json=$(aws s3 cp "$URL" - | gunzip |  grep -E '^\{\"Container' | \
+  jq -r 'select(.Envelope.["Payload-Metadata"].["HTTP-Response-Metadata"].["HTML-Metadata"].["Head"].Link) | .Envelope.["Payload-Metadata"].["HTTP-Response-Metadata"].["HTML-Metadata"].["Head"].Link, .Links' | \
+  grep -v "null"| jq .[] | jq -r 'select(.type == "application/rss+xml") | .url'|grep "http*"| jq -R . | jq -s '{urls: .}' )
 
-
-#cat "$archivo_temp" | grep "http*" |  
-urls_json=$(cat "$archivo_temp" | grep "http*" | jq -R . | jq -s '{urls: .}')
-
-#urls_json_p=$(cat "$archivo_temp" | grep "http*" | head -n 10 | jq -R . | jq -s '{urls: .}') && echo "$urls_json_p"  > output.json
-
-#formato esperado {"urls": ["",""]}
-
-rm "$archivo_temp"
-
-archivo_temp2=$(mktemp)
-
-echo "$urls_json" > $archivo_temp2
-#echo "$urls_json_p" > $archivo_temp2
-
-./process_rss_batch.sh "$archivo_temp2"
+# Si no se obtiene ninguna URL, mostrar un mensaje de advertencia
+if [ -z "$urls_json" ]; then
+  echo "No se encontraron URLs válidas."
+  exit 2
+fi
+#echo "$urls_json"
+# Guardar el JSON de URLs en un archivo temporal para ser procesado por otro script
+echo "$urls_json" | ./process_rss_batch.sh
 
 echo "Proceso completado."
