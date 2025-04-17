@@ -1,4 +1,4 @@
-# Imatia-rss-engine
+# rss-engine
 
 This repository contains Terraform configurations for deploying the RSS Engine infrastructure on AWS. It includes modules for setting up the server, workers, Elasticsearch, Prometheus, and Grafana.
 
